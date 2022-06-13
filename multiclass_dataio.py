@@ -192,7 +192,8 @@ class SceneClassDataset(torch.utils.data.Dataset):
         object_classes = sorted(glob(os.path.join(root_dir, "*/")))
         all_objects = []
         for object_class in object_classes:
-            file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r")
+            #file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r")
+            file_list = open(object_class + dataset_type + ".lst", "r") # softras not available for some classes. -Finn
             content = file_list.read()
             content_list = content.split("\n")
             content_list.pop() # remove last element since that is empty after newline

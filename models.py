@@ -171,7 +171,6 @@ class LFAutoDecoder(LightFieldModel):
         self.pose = None
         self.intrinsics = None
         self.uv = None
-        self.num_iters = num_iters
 
         if classify:
             self.forward = self.forward_classify
