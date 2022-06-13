@@ -171,7 +171,6 @@ class LFAutoDecoder(LightFieldModel):
         self.pose = None
         self.intrinsics = None
         self.uv = None
-        self.lr = lr
         self.num_iters = num_iters
 
         if classify:
@@ -195,10 +194,6 @@ class LFAutoDecoder(LightFieldModel):
             latent_codes = nn.Embedding(num_instances, self.latent_dim).cuda() # num_instances, self.latent_dim
             nn.init.zeros_(latent_codes.weight)
 
-            optimizer = torch.optim.Adam(latent_codes.parameters(), lr=self.lr)
-            lr_schedule = lambda epoch: 0.1**(epoch/self.num_iters)
-            scheduler = LambdaLR(optimizer, lr_lambda=lr_schedule)
-
             for iter in range(self.num_iters):
                 light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
                 phi = self.get_light_field_function(latent_codes.weight)
@@ -207,14 +202,10 @@ class LFAutoDecoder(LightFieldModel):
                 novel_views = novel_views.view(b, n_qry, n_pix, 3)
 
                 loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(self.latent_codes.weight**2)
-
-                optimizer.zero_grad()
                 loss.backward()
-                optimizer.step()
-                scheduler.step()
 
                 if iter % 10 == 0:
-                    print(f"Inference iter {iter}, loss {loss}, schedule {lr_schedule(iter)}.")
+                    print(f"Inference iter {iter}, loss {loss}.")
         pred_class = self.linear_classifier(latent_codes.weight)
         return pred_class
 
