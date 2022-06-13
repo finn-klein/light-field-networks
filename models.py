@@ -158,17 +158,75 @@ class LightFieldModel(nn.Module):
 
 
 class LFAutoDecoder(LightFieldModel):
-    def __init__(self, latent_dim, num_instances, parameterization='plucker', **kwargs):
+    def __init__(self, latent_dim, num_instances, parameterization='plucker', classify=False, **kwargs):
         super().__init__(latent_dim=latent_dim, parameterization=parameterization, **kwargs)
         self.num_instances = num_instances
 
         self.latent_codes = nn.Embedding(num_instances, self.latent_dim)
         nn.init.normal_(self.latent_codes.weight, mean=0, std=0.01)
 
+        self.linear_classifier = nn.Linear(self.latent_dim, 13)
+        self.linear_classifier.apply(custom_layers.init_weights_normal)
+
+        self.pose = None
+        self.intrinsics = None
+        self.uv = None
+        self.lr = lr
+        self.num_iters = num_iters
+
+        if classify:
+            self.forward = self.forward_classify
+
     def get_z(self, input, val=False):
         instance_idcs = input['query']["instance_idx"].long()
         z = self.latent_codes(instance_idcs)
         return z
+
+    def infer_and_classify(self, rgb, pose, intrinsics, uv):
+        b, n_ctxt = uv.shape[:2]
+        n_qry, n_pix = uv.shape[1:3]
+
+        pose = util.flatten_first_two(pose)
+        intrinsics = util.flatten_first_two(intrinsics)
+        uv = util.flatten_first_two(uv)
+
+        with torch.enable_grad():
+            num_instances = rgb.shape[0]
+            latent_codes = nn.Embedding(num_instances, self.latent_dim).cuda() # num_instances, self.latent_dim
+            nn.init.zeros_(latent_codes.weight)
+
+            optimizer = torch.optim.Adam(latent_codes.parameters(), lr=self.lr)
+            lr_schedule = lambda epoch: 0.1**(epoch/self.num_iters)
+            scheduler = LambdaLR(optimizer, lr_lambda=lr_schedule)
+
+            for iter in range(self.num_iters):
+                light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
+                phi = self.get_light_field_function(latent_codes.weight)
+                lf_out = phi(light_field_coords)
+                novel_views = lf_out[..., :3]
+                novel_views = novel_views.view(b, n_qry, n_pix, 3)
+
+                loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(self.latent_codes.weight**2)
+
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+                scheduler.step()
+
+                if iter % 10 == 0:
+                    print(f"Inference iter {iter}, loss {loss}, schedule {lr_schedule(iter)}.")
+        pred_class = self.linear_classifier(latent_codes.weight)
+        return pred_class
+
+    def forward_classify(self, images):
+        return self.infer_and_classify(images, self.pose, self.intrinsics, self.uv)
+
+    def forward_w_dict(self, input, lr=1e-3, num_iters=150):
+        rgb = input["rgb"]
+        pose = input["pose"]
+        intrinsics = input["intrinsics"]
+        uv = input["uv"].float()
+        return self.infer_and_classify(rgb, pose, intrinsics, uv)
 
 
 class LFEncoder(LightFieldModel):

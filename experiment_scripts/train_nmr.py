@@ -87,7 +87,7 @@ def multigpu_train(gpu, opt, cache):
     # Define the loss
     summary_fn = summaries.img_summaries
     root_path = os.path.join(opt.logging_root, opt.experiment_name)
-    loss_fn = val_loss_fn = loss_functions.LFLoss(1)
+    loss_fn = val_loss_fn = loss_functions.LFClassLoss(1)
 
     training.multiscale_training(model=model, dataloader_callback=create_dataloader_callback,
                                  dataloader_iters=(1000000, ), dataloader_params=((64, opt.batch_size, None), ),
