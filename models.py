@@ -154,6 +154,10 @@ class LightFieldModel(nn.Module):
                 out_dict['depth'] = depth
 
         out_dict['rgb'] = rgb
+
+        # might be smarter to move this to the child class where self.linear_classifier is defined -Finn
+        pred_class = self.linear_classifier(z)
+        out_dict['class'] = pred_class
         return out_dict
 
 
