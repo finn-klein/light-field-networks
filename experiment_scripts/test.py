@@ -100,6 +100,7 @@ log_dir = Path(opt.logging_root) / opt.experiment_name
 if opt.dataset == 'NMR':
     class_psnrs = defaultdict(list)
     class_counter = defaultdict(int)
+    class_prediction = defaultdict(list)
 else:
     psnrs = []
 
@@ -132,6 +133,11 @@ with torch.no_grad():
             out_dict = {}
             out_dict['rgb'] = model_output['rgb']
             out_dict['gt_rgb'] = model_input['query']['rgb']
+
+            out_dict['class'] = int(model_output['class'].cpu().numpy())
+            out_dict['class_gt'] = obj_class
+            is_class_correct = 1 if out_dict['class'] == obj_class else 0
+            class_prediction[obj_class].append(is_class_correct)
 
             is_context = False
             if opt.viewlist is not None:
@@ -179,14 +185,22 @@ with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
     if opt.dataset == 'NMR':
         out_file.write(' & '.join(class_psnrs.keys()) + '\n')
 
-        psnrs, ssims = [], []
+        psnrs, ssims, preds = [], [], []
         for value in class_psnrs.values():
             mean = np.mean(np.array(value), axis=0)
             psnrs.append(mean[0])
             ssims.append(mean[1])
+            preds.append(np.mean(class_prediction[value])) #Classification accuracy per class
 
         out_file.write(' & '.join(map(lambda x: f"{x:.3f}", psnrs)) + '\n')
         out_file.write(' & '.join(map(lambda x: f"{x:.3f}", ssims)) + '\n')
+        out_file.write(' & '.join(map(lambda x: f"{x:.3f}", preds)) + '\n')
+
+        pred_total = []
+        for value in class_prediction.values():
+            pred_total = np.append(pred_total, class_prediction[value])
+        acc_total = np.mean(pred_total)
+        out_file.write("Classification accuracy across classes:" + acc_total + "\n")
     else:
         mean = np.mean(psnrs, axis=0)
         out_file.write(f"{mean[0]} PSRN {mean[1]} SSIM")
