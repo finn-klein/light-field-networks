@@ -108,7 +108,8 @@ def get_instance_datasets(root, max_num_instances=None, specific_observation_idc
         if dataset_type == "train":
             file_list = open(object_class + dataset_type + ".lst", "r")
         else:
-            file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r") # softras_train not available for the benches class -Finn
+            #file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r") # softras_train not available for the benches class -Finn
+            file_list = open(object_class + dataset_type + ".lst", "r") # softras_test contains instance IDs that are not in the NMR Dataset. -Finn
         content = file_list.read()
         content_list = content.split("\n")
         content_list.pop()  # remove last element since that is empty after newline
