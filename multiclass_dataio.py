@@ -105,8 +105,10 @@ def get_instance_datasets(root, max_num_instances=None, specific_observation_idc
     object_classes = sorted(glob(os.path.join(root, "*/")))
     all_objects = []
     for object_class in object_classes:
-        # file_list = open(object_class + dataset_type + ".lst", "r")
-        file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r")
+        if dataset_type == "train":
+            file_list = open(object_class + dataset_type + ".lst", "r")
+        else:
+            file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r") # softras_train not available for the benches class -Finn
         content = file_list.read()
         content_list = content.split("\n")
         content_list.pop()  # remove last element since that is empty after newline
@@ -193,7 +195,10 @@ class SceneClassDataset(torch.utils.data.Dataset):
         all_objects = []
         for object_class in object_classes:
             #file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r")
-            file_list = open(object_class + dataset_type + ".lst", "r") # softras not available for some classes. -Finn
+            if dataset_type == "train":
+                file_list = open(object_class + dataset_type + ".lst", "r") # softras_train not available for some classes. -Finn
+            else:
+                file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r")
             content = file_list.read()
             content_list = content.split("\n")
             content_list.pop() # remove last element since that is empty after newline
