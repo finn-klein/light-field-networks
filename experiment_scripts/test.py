@@ -129,6 +129,7 @@ with torch.no_grad():
         for j, query in enumerate(dataset[i]):
             model_input = util.assemble_model_input(query, query)
             model_output = model(model_input)
+            print(model_output['class'])
 
             out_dict = {}
             out_dict['rgb'] = model_output['rgb']
@@ -170,7 +171,7 @@ with torch.no_grad():
                 img = convert_image(out_dict['rgb'], 'rgb')
                 cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
 
-        if opt.dataset == 'NMR':
+        if opt.dataset == 'NMR': #TODO put classification logging here as well
             mean_dict = {}
             for k, v in class_psnrs.items():
                 mean = np.mean(np.array(v), axis=0)
