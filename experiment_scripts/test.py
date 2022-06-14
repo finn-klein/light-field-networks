@@ -107,6 +107,10 @@ with torch.no_grad():
     for i in range(len(dataset)):
         print(f"Object {i:04d}")
 
+        if dataset[i].poses == []:
+            print("Object has no poses, skipping")
+            continue
+
         dummy_query = dataset[i][0]
         instance_name = dummy_query['instance_name']
 
