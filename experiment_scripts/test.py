@@ -129,13 +129,12 @@ with torch.no_grad():
         for j, query in enumerate(dataset[i]):
             model_input = util.assemble_model_input(query, query)
             model_output = model(model_input)
-            print(model_output['class'])
 
             out_dict = {}
             out_dict['rgb'] = model_output['rgb']
             out_dict['gt_rgb'] = model_input['query']['rgb']
 
-            out_dict['class'] = int(model_output['class'].cpu().numpy())
+            out_dict['class'] = int(np.argmax(model_output['class']).cpu().numpy())
             out_dict['class_gt'] = obj_class
             is_class_correct = 1 if out_dict['class'] == obj_class else 0
             class_prediction[obj_class].append(is_class_correct)
