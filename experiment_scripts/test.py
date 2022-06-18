@@ -36,7 +36,7 @@ p.add_argument('--max_num_instances', type=int, default=None)
 p.add_argument('--save_out_first_n', type=int, default=100, help='Only saves images of first n object instances.')
 p.add_argument('--img_sidelength', type=int, default=64, required=False)
 p.add_argument('--viewlist', type=str, default=None, required=False)
-p.add_argument('--omit_perceptual_losses', action='store_false')
+p.add_argument('--omit_perceptual_losses', action='store_true', default=False)
 
 opt = p.parse_args()
 
@@ -177,15 +177,15 @@ with torch.no_grad():
                     img = convert_image(out_dict['rgb'], 'rgb')
                     cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
 
-            if opt.dataset == 'NMR':
-                if not opt.omit_perceptual_losses:
-                    mean_dict = {}
-                    for k, v in class_psnrs.items():
-                        mean = np.mean(np.array(v), axis=0)
-                        mean_dict[k] = f"{mean[0]:.3f} {mean[1]:.3f}"
-                    print(mean_dict)
+        if opt.dataset == 'NMR':
+            if not opt.omit_perceptual_losses:
+                mean_dict = {}
+                for k, v in class_psnrs.items():
+                    mean = np.mean(np.array(v), axis=0)
+                    mean_dict[k] = f"{mean[0]:.3f} {mean[1]:.3f}"
+                print(mean_dict)
 
-                class_counter[obj_class] += 1
+            class_counter[obj_class] += 1
             else:
                 print(np.mean(np.array(psnrs), axis=0))
 

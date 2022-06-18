@@ -105,3 +105,4 @@ venv.bak/
 experiment_scripts/test_accuracy.py
 experiment_scripts/train_nmr_DDP.py
 Experiment tracker.txt
+experiment_scripts/configargparse_test.py
