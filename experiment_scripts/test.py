@@ -177,16 +177,18 @@ with torch.no_grad():
                     img = convert_image(out_dict['rgb'], 'rgb')
                     cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
 
-            if opt.dataset == 'NMR':
-                mean_dict = {}
-                for k, v in class_psnrs.items():
-                    mean = np.mean(np.array(v), axis=0)
-                    mean_dict[k] = f"{mean[0]:.3f} {mean[1]:.3f}"
-                print(mean_dict)
+                if opt.dataset == 'NMR':
+                    mean_dict = {}
+                    for k, v in class_psnrs.items():
+                        mean = np.mean(np.array(v), axis=0)
+                        mean_dict[k] = f"{mean[0]:.3f} {mean[1]:.3f}"
+                    print(mean_dict)
+                else:
+                    print(np.mean(np.array(psnrs), axis=0))
 
-            class_counter[obj_class] += 1
-        else:
-            print(np.mean(np.array(psnrs), axis=0))
+            if opt.dataset == 'NMR':
+                class_counter[obj_class] += 1
+
 
 with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
     if opt.dataset == 'NMR':
