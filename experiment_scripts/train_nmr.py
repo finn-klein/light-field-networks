@@ -40,6 +40,7 @@ p.add_argument('--epochs_til_ckpt', type=int, default=10)
 p.add_argument('--steps_til_summary', type=int, default=5000)
 p.add_argument('--iters_til_ckpt', type=int, default=10000)
 p.add_argument('--checkpoint_path', default=None)
+p.add_argument('--optimizer_checkpoint_path', default=None)
 opt = p.parse_args()
 
 
@@ -80,6 +81,11 @@ def multigpu_train(gpu, opt, cache):
         print(f"Loading weights from {opt.checkpoint_path}...")
         state_dict = torch.load(opt.checkpoint_path)
         model.load_state_dict(state_dict)
+        if opt.optimizer_checkpoint_path is not None:
+            print(f"Initializing optimizer from {opt.optimizer_checkpoint_path}...")
+            optimizer = torch.optim.Adam(lr=opt.lr, params=model.parameters()).cuda()
+            optimizer_state_dict = torch.load(opt.optimizer_checkpoint_path)
+            optimizer.load_state_dict(optimizer_state_dict)
 
     if opt.gpus > 1:
         sync_model(model)
@@ -96,7 +102,8 @@ def multigpu_train(gpu, opt, cache):
                                  model_dir=root_path, loss_fn=loss_fn, val_loss_fn=val_loss_fn,
                                  iters_til_checkpoint=opt.iters_til_ckpt, summary_fn=summary_fn,
                                  overwrite=True,
-                                 rank=gpu, train_function=training.train, gpus=opt.gpus)
+                                 rank=gpu, train_function=training.train, gpus=opt.gpus,
+                                 optimizers = [optimizer] if optimizer is not None else None)
 
 if __name__ == "__main__":
     manager = Manager()
