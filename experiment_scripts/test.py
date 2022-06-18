@@ -206,8 +206,8 @@ with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
         pred_total = []
         for key in multiclass_dataio.string2class_dict.keys():
             preds.append(np.mean(class_prediction[key])) # classification accuracy per class
-            out_file.write(' & '.join(map(lambda x: f"{x:.3f}", preds)) + '\n')
             pred_total = np.append(pred_total, class_prediction[key])
+        out_file.write(' & '.join(map(lambda x: f"{x:.3f}", preds)) + '\n')
 
         acc_total = np.mean(pred_total)
         out_file.write(f"Classification accuracy across classes: {acc_total:.3f}\n")
