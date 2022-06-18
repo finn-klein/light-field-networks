@@ -199,8 +199,8 @@ with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
         out_file.write(' & '.join(map(lambda x: f"{x:.3f}", preds)) + '\n')
 
         pred_total = []
-        for value in class_prediction.values():
-            pred_total = np.append(pred_total, class_prediction[value])
+        for key, value in class_prediction.items():
+            pred_total = np.append(pred_total, class_prediction[key])
         acc_total = np.mean(pred_total)
         out_file.write("Classification accuracy across classes:" + acc_total + "\n")
     else:
