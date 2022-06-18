@@ -186,8 +186,8 @@ with torch.no_grad():
                 print(mean_dict)
 
             class_counter[obj_class] += 1
-            else:
-                print(np.mean(np.array(psnrs), axis=0))
+        else:
+            print(np.mean(np.array(psnrs), axis=0))
 
 with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
     if opt.dataset == 'NMR':
