@@ -159,9 +159,8 @@ with torch.no_grad():
 
             if opt.dataset=='NMR' and class_counter[obj_class] < opt.save_out_first_n:
                 for k, v in out_dict.items():
-                    print(k, v)
                     if "class" in k:
-                        pass # ignore classification results
+                        continue # ignore classification results
                     img = convert_image(v, k)
                     if k == 'gt_rgb':
                         cv2.imwrite(str(instance_dir / f"{j:06d}_{k}.png"), img)
