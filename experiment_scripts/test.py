@@ -160,7 +160,7 @@ with torch.no_grad():
             if opt.dataset=='NMR' and class_counter[obj_class] < opt.save_out_first_n:
                 for k, v in out_dict.items():
                     if "class" in k:
-                        continue # ignore classification results
+                        continue # ignore integer-valued keys "class" and "class_gt"
                     img = convert_image(v, k)
                     if k == 'gt_rgb':
                         cv2.imwrite(str(instance_dir / f"{j:06d}_{k}.png"), img)
@@ -172,7 +172,7 @@ with torch.no_grad():
                 img = convert_image(out_dict['rgb'], 'rgb')
                 cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
 
-        if opt.dataset == 'NMR': #TODO put classification logging here as well
+        if opt.dataset == 'NMR':
             mean_dict = {}
             for k, v in class_psnrs.items():
                 mean = np.mean(np.array(v), axis=0)
@@ -188,11 +188,11 @@ with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
         out_file.write(' & '.join(class_psnrs.keys()) + '\n')
 
         psnrs, ssims, preds = [], [], []
-        for value in class_psnrs.values():
+        for key, value in class_psnrs.items():
             mean = np.mean(np.array(value), axis=0)
             psnrs.append(mean[0])
             ssims.append(mean[1])
-            preds.append(np.mean(class_prediction[value])) #Classification accuracy per class
+            preds.append(np.mean(class_prediction[key])) #Classification accuracy per class
 
         out_file.write(' & '.join(map(lambda x: f"{x:.3f}", psnrs)) + '\n')
         out_file.write(' & '.join(map(lambda x: f"{x:.3f}", ssims)) + '\n')
