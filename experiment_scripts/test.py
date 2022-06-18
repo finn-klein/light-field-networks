@@ -36,7 +36,7 @@ p.add_argument('--max_num_instances', type=int, default=None)
 p.add_argument('--save_out_first_n', type=int, default=100, help='Only saves images of first n object instances.')
 p.add_argument('--img_sidelength', type=int, default=64, required=False)
 p.add_argument('--viewlist', type=str, default=None, required=False)
-p.add_argument('--eval_perceptual_losses', type=bool, default=True, required=False)
+p.add_argument('--omit_perceptual_losses', action='store_false')
 
 opt = p.parse_args()
 
@@ -132,7 +132,7 @@ with torch.no_grad():
             model_output = model(model_input)
 
             out_dict = {}
-            if opt.eval_perceptual_losses:
+            if not opt.omit_perceptual_losses:
                 out_dict['rgb'] = model_output['rgb']
                 out_dict['gt_rgb'] = model_input['query']['rgb']
 
@@ -153,7 +153,7 @@ with torch.no_grad():
                     print(f'{key} not in viewlist')
                     continue
             
-            if opt.eval_perceptual_losses:
+            if not opt.omit_perceptual_losses:
                 # if opt.dataset != 'NMR' or not is_context:
                 psnr, ssim = get_psnr(out_dict['rgb'], out_dict['gt_rgb'])
                 if opt.dataset == 'NMR':
@@ -177,25 +177,24 @@ with torch.no_grad():
                     img = convert_image(out_dict['rgb'], 'rgb')
                     cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
 
-                if opt.dataset == 'NMR':
+            if opt.dataset == 'NMR':
+                if not opt.omit_perceptual_losses:
                     mean_dict = {}
                     for k, v in class_psnrs.items():
                         mean = np.mean(np.array(v), axis=0)
                         mean_dict[k] = f"{mean[0]:.3f} {mean[1]:.3f}"
                     print(mean_dict)
-                else:
-                    print(np.mean(np.array(psnrs), axis=0))
 
-            if opt.dataset == 'NMR':
                 class_counter[obj_class] += 1
-
+            else:
+                print(np.mean(np.array(psnrs), axis=0))
 
 with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
     if opt.dataset == 'NMR':
         out_file.write(' & '.join(multiclass_dataio.string2class_dict.keys()) + '\n')
 
         psnrs, ssims, preds = [], [], []
-        if opt.eval_perceptual_losses:
+        if not opt.omit_perceptual_losses:
             for key, value in class_psnrs.items():
                 mean = np.mean(np.array(value), axis=0)
                 psnrs.append(mean[0])
