@@ -159,6 +159,7 @@ with torch.no_grad():
 
             if opt.dataset=='NMR' and class_counter[obj_class] < opt.save_out_first_n:
                 for k, v in out_dict.items():
+                    print(k, v)
                     if "class" in k:
                         pass # ignore classification results
                     img = convert_image(v, k)
