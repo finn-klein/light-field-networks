@@ -36,6 +36,7 @@ p.add_argument('--max_num_instances', type=int, default=None)
 p.add_argument('--save_out_first_n', type=int, default=100, help='Only saves images of first n object instances.')
 p.add_argument('--img_sidelength', type=int, default=64, required=False)
 p.add_argument('--viewlist', type=str, default=None, required=False)
+p.add_argument('--eval_perceptual_losses', type=bool, default=True, required=False)
 
 opt = p.parse_args()
 
@@ -131,12 +132,15 @@ with torch.no_grad():
             model_output = model(model_input)
 
             out_dict = {}
-            out_dict['rgb'] = model_output['rgb']
-            out_dict['gt_rgb'] = model_input['query']['rgb']
+            if opt.eval_perceptual_losses:
+                out_dict['rgb'] = model_output['rgb']
+                out_dict['gt_rgb'] = model_input['query']['rgb']
 
-            out_dict['class'] = int(np.argmax(model_output['class'].cpu().numpy()))
-            out_dict['class_gt'] = obj_class
-            is_class_correct = 1 if out_dict['class'] == obj_class else 0
+            predicted_class = int(np.argmax(model_output['class'].cpu().numpy()))
+            predicted_class = multiclass_dataio.class2string_dict[predicted_class]
+            out_dict['class'] = predicted_class
+            out_dict['gt_class'] = obj_class
+            is_class_correct = 1 if predicted_class == obj_class else 0
             class_prediction[obj_class].append(is_class_correct)
 
             is_context = False
@@ -148,36 +152,37 @@ with torch.no_grad():
                 else:
                     print(f'{key} not in viewlist')
                     continue
+            
+            if opt.eval_perceptual_losses:
+                # if opt.dataset != 'NMR' or not is_context:
+                psnr, ssim = get_psnr(out_dict['rgb'], out_dict['gt_rgb'])
+                if opt.dataset == 'NMR':
+                    if not is_context:
+                        class_psnrs[obj_class].append((psnr, ssim))
+                else:
+                    psnrs.append((psnr, ssim))
 
-            # if opt.dataset != 'NMR' or not is_context:
-            psnr, ssim = get_psnr(out_dict['rgb'], out_dict['gt_rgb'])
+                if opt.dataset=='NMR' and class_counter[obj_class] < opt.save_out_first_n:
+                    for k, v in out_dict.items():
+                        if "class" in k:
+                            continue # ignore integer-valued keys "class" and "class_gt"
+                        img = convert_image(v, k)
+                        if k == 'gt_rgb':
+                            cv2.imwrite(str(instance_dir / f"{j:06d}_{k}.png"), img)
+                        elif k == 'rgb':
+                            cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
+                elif i < opt.save_out_first_n:
+                    img = convert_image(out_dict['gt_rgb'], 'rgb')
+                    cv2.imwrite(str(instance_dir / f"{j:06d}_gt.png"), img)
+                    img = convert_image(out_dict['rgb'], 'rgb')
+                    cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
+
             if opt.dataset == 'NMR':
-                if not is_context:
-                    class_psnrs[obj_class].append((psnr, ssim))
-            else:
-                psnrs.append((psnr, ssim))
-
-            if opt.dataset=='NMR' and class_counter[obj_class] < opt.save_out_first_n:
-                for k, v in out_dict.items():
-                    if "class" in k:
-                        continue # ignore integer-valued keys "class" and "class_gt"
-                    img = convert_image(v, k)
-                    if k == 'gt_rgb':
-                        cv2.imwrite(str(instance_dir / f"{j:06d}_{k}.png"), img)
-                    elif k == 'rgb':
-                        cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
-            elif i < opt.save_out_first_n:
-                img = convert_image(out_dict['gt_rgb'], 'rgb')
-                cv2.imwrite(str(instance_dir / f"{j:06d}_gt.png"), img)
-                img = convert_image(out_dict['rgb'], 'rgb')
-                cv2.imwrite(str(instance_dir / f"{j:06d}.png"), img)
-
-        if opt.dataset == 'NMR':
-            mean_dict = {}
-            for k, v in class_psnrs.items():
-                mean = np.mean(np.array(v), axis=0)
-                mean_dict[k] = f"{mean[0]:.3f} {mean[1]:.3f}"
-            print(mean_dict)
+                mean_dict = {}
+                for k, v in class_psnrs.items():
+                    mean = np.mean(np.array(v), axis=0)
+                    mean_dict[k] = f"{mean[0]:.3f} {mean[1]:.3f}"
+                print(mean_dict)
 
             class_counter[obj_class] += 1
         else:
@@ -185,24 +190,26 @@ with torch.no_grad():
 
 with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
     if opt.dataset == 'NMR':
-        out_file.write(' & '.join(class_psnrs.keys()) + '\n')
+        out_file.write(' & '.join(multiclass_dataio.string2class_dict.keys()) + '\n')
 
         psnrs, ssims, preds = [], [], []
-        for key, value in class_psnrs.items():
-            mean = np.mean(np.array(value), axis=0)
-            psnrs.append(mean[0])
-            ssims.append(mean[1])
-            preds.append(np.mean(class_prediction[key])) #Classification accuracy per class
+        if opt.eval_perceptual_losses:
+            for key, value in class_psnrs.items():
+                mean = np.mean(np.array(value), axis=0)
+                psnrs.append(mean[0])
+                ssims.append(mean[1])
 
-        out_file.write(' & '.join(map(lambda x: f"{x:.3f}", psnrs)) + '\n')
-        out_file.write(' & '.join(map(lambda x: f"{x:.3f}", ssims)) + '\n')
-        out_file.write(' & '.join(map(lambda x: f"{x:.3f}", preds)) + '\n')
-
+            out_file.write(' & '.join(map(lambda x: f"{x:.3f}", psnrs)) + '\n')
+            out_file.write(' & '.join(map(lambda x: f"{x:.3f}", ssims)) + '\n')
+        
         pred_total = []
-        for key, value in class_prediction.items():
+        for key in multiclass_dataio.string2class_dict.keys():
+            preds.append(np.mean(class_prediction[key])) # classification accuracy per class
+            out_file.write(' & '.join(map(lambda x: f"{x:.3f}", preds)) + '\n')
             pred_total = np.append(pred_total, class_prediction[key])
+
         acc_total = np.mean(pred_total)
-        out_file.write("Classification accuracy across classes:" + acc_total + "\n")
+        out_file.write("Classification accuracy across classes:", acc_total, "\n")
     else:
         mean = np.mean(psnrs, axis=0)
         out_file.write(f"{mean[0]} PSRN {mean[1]} SSIM")
