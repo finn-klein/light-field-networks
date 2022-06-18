@@ -210,7 +210,7 @@ with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
             pred_total = np.append(pred_total, class_prediction[key])
 
         acc_total = np.mean(pred_total)
-        out_file.write("Classification accuracy across classes:", acc_total, "\n")
+        out_file.write(f"Classification accuracy across classes: {acc_total:.3f}\n")
     else:
         mean = np.mean(psnrs, axis=0)
         out_file.write(f"{mean[0]} PSRN {mean[1]} SSIM")
