@@ -134,7 +134,7 @@ with torch.no_grad():
             out_dict['rgb'] = model_output['rgb']
             out_dict['gt_rgb'] = model_input['query']['rgb']
 
-            out_dict['class'] = int(np.argmax(model_output['class']).cpu().numpy())
+            out_dict['class'] = int(np.argmax(model_output['class'].cpu().numpy()))
             out_dict['class_gt'] = obj_class
             is_class_correct = 1 if out_dict['class'] == obj_class else 0
             class_prediction[obj_class].append(is_class_correct)
