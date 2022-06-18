@@ -83,7 +83,7 @@ def multigpu_train(gpu, opt, cache):
         model.load_state_dict(state_dict)
         if opt.optimizer_checkpoint_path is not None:
             print(f"Initializing optimizer from {opt.optimizer_checkpoint_path}...")
-            optimizer = torch.optim.Adam(lr=opt.lr, params=model.parameters()).cuda()
+            optimizer = torch.optim.Adam(lr=opt.lr, params=model.parameters())
             optimizer_state_dict = torch.load(opt.optimizer_checkpoint_path)
             optimizer.load_state_dict(optimizer_state_dict)
 
