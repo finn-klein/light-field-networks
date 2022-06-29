@@ -108,7 +108,7 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                 ##### ACCURACY #####
                 for i in range(gt['class'].shape[0]): # gt is a batch of samples -> need to iterate through dimension 0
                     obj_class = int(gt['class'][i].cpu().numpy())
-                    predicted_class = int(np.argmax(model_output['class'][i].cpu().numpy()))
+                    predicted_class = int(np.argmax(model_output['class'][i].detach().cpu().numpy()))
                     predicted_class = multiclass_dataio.class2string_dict[predicted_class]
                     is_class_correct = 1 if predicted_class == obj_class else 0
                     class_prediction[obj_class].append(is_class_correct)
