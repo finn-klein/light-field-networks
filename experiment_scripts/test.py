@@ -193,7 +193,7 @@ with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
     if opt.dataset == 'NMR':
         out_file.write(' & '.join(multiclass_dataio.string2class_dict.keys()) + '\n')
 
-        psnrs, ssims, preds = [], [], []
+        psnrs, ssims = [], []
         if not opt.omit_perceptual_losses:
             for key, value in class_psnrs.items():
                 mean = np.mean(np.array(value), axis=0)
@@ -203,13 +203,8 @@ with open(os.path.join(log_dir, "results.txt"), "w") as out_file:
             out_file.write(' & '.join(map(lambda x: f"{x:.3f}", psnrs)) + '\n')
             out_file.write(' & '.join(map(lambda x: f"{x:.3f}", ssims)) + '\n')
         
-        pred_total = []
-        for key in multiclass_dataio.string2class_dict.keys():
-            preds.append(np.mean(class_prediction[key])) # classification accuracy per class
-            pred_total = np.append(pred_total, class_prediction[key])
-        out_file.write(' & '.join(map(lambda x: f"{x:.3f}", preds)) + '\n')
-
-        acc_total = np.mean(pred_total)
+        acc_per_class, acc_total = util.calculate_accuracies(class_prediction, as_list=True)
+        out_file.write(' & '.join(map(lambda x: f"{x:.3f}", acc_per_class)) + '\n')
         out_file.write(f"Classification accuracy across classes: {acc_total:.3f}\n")
     else:
         mean = np.mean(psnrs, axis=0)
