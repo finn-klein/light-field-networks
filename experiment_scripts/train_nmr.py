@@ -67,7 +67,7 @@ def multigpu_train(gpu, opt, cache):
         if opt.val_root is not None:
             val_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=opt.num_trgt,
                                                               root_dir=opt.val_root, query_sparsity=None,
-                                                              img_sidelength=sidelength)
+                                                              img_sidelength=sidelength, dataset_type='val')
             val_loader = DataLoader(val_dataset, batch_size=1, shuffle=True, drop_last=False, num_workers=0)
             return train_loader, val_loader
 
