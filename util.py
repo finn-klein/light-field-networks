@@ -333,3 +333,19 @@ def assemble_model_input(context, query, gpu=True):
     if gpu:
         model_input = dict_to_gpu(model_input)
     return model_input
+
+def calculate_accuracies(class_prediction, as_list=False):
+    if as_list:
+        acc_per_class = []
+    else:
+        acc_per_class = defaultdict(float)
+
+    all_predictions = []
+    for key in class_prediction.keys():
+        if as_list:
+            acc_per_class.append(np.mean(class_prediction[key]))
+        else:
+            acc_per_class[key] = np.mean(class_prediction[key])
+
+        all_predictions = np.append(acc_total, class_prediction[key])
+    return acc_per_class, np.mean(all_predictions)
