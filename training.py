@@ -78,6 +78,7 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                 torch.save(model.state_dict(),
                            os.path.join(checkpoints_dir, 'model_epoch_%04d_iter_%06d.pth' % (epoch, total_steps)))
 
+            class_prediction = defaultdict(list)
             for step, (model_input, gt) in enumerate(train_dataloader):
 
                 if device == 'gpu':
@@ -85,23 +86,31 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                     gt = util.dict_to_gpu(gt)
 
                 model_output = model(model_input)
-                losses, loss_summaries = loss_fn(model_output, gt, model=model)
 
+                ##### LOSS ######
+                losses, loss_summaries = loss_fn(model_output, gt, model=model)
                 train_loss = 0.
                 for loss_name, loss in losses.items():
                     single_loss = loss.mean()
 
                     if (loss_schedules is not None) and (loss_name in loss_schedules):
                         if rank == 0:
-                            writer.add_scalar(loss_name + "_weight", loss_schedules[loss_name](total_steps), total_steps)
+                            writer.add_scalar("loss/" + loss_name + "_weight", loss_schedules[loss_name](total_steps), total_steps)
                         single_loss *= loss_schedules[loss_name](total_steps)
 
                     if rank == 0:
-                        writer.add_scalar(loss_name, single_loss, total_steps)
+                        writer.add_scalar("loss/" + loss_name, single_loss, total_steps)
                     train_loss += single_loss
 
                 if rank == 0:
-                    writer.add_scalar("total_train_loss", train_loss, total_steps)
+                    writer.add_scalar("loss/total_train_loss", train_loss, total_steps)
+
+                ##### ACCURACY #####
+                obj_class = int(gt['class'].cpu().numpy())
+                predicted_class = int(np.argmax(model_output['class'].cpu().numpy()))
+                predicted_class = multiclass_dataio.class2string_dict[predicted_class]
+                is_class_correct = 1 if predicted_class == obj_class else 0
+                class_prediction[obj_class].append(is_class_correct)
 
                 if not total_steps % steps_til_summary and rank == 0:
                     torch.save(model.state_dict(),
@@ -140,25 +149,40 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                         with torch.no_grad():
                             model.eval()
                             val_losses = defaultdict(list)
+                            val_class_prediction = defaultdict(list)
                             for val_i, (model_input, gt) in enumerate(val_dataloader):
                                 if device == 'gpu':
                                     model_input = util.dict_to_gpu(model_input)
                                     gt = util.dict_to_gpu(gt)
 
                                 model_output = model(model_input, val=True)
-                                val_loss, val_loss_smry = val_loss_fn(model_output, gt, val=True, model=model)
 
+                                ##### LOSS #####
+                                val_loss, val_loss_smry = val_loss_fn(model_output, gt, val=True, model=model)
                                 for name, value in val_loss.items():
                                     val_losses[name].append(value)
 
+                                ##### ACCURACY #####
+                                obj_class = int(gt['class'].cpu().numpy())
+                                predicted_class = int(np.argmax(model_output['class'].cpu().numpy()))
+                                predicted_class = multiclass_dataio.class2string_dict[predicted_class]
+                                is_class_correct = 1 if predicted_class == obj_class else 0
+                                val_class_prediction[obj_class].append(is_class_correct)
+
                                 if val_i == batches_per_validation:
                                     break
+                            
+                            # Log validation accuracy
+                            acc_per_class, acc_total = util.calculate_accuracies(val_class_prediction)
+                            for key in val_class_prediction.keys():
+                                writer.add_scalar("val_acc/" + key, acc_per_class[key], total_steps)
+                            writer.add_scalar("val_acc/total", acc_total, total_steps)
 
                             for loss_name, loss in val_losses.items():
                                 single_loss = np.mean(np.concatenate([l.reshape(-1).cpu().numpy() for l in loss], axis=0))
 
                                 if rank == 0:
-                                    writer.add_scalar('val_' + loss_name, single_loss, total_steps)
+                                    writer.add_scalar('loss/val_' + loss_name, single_loss, total_steps)
 
                             if rank == 0:
                                 if val_summary_fn is not None:
@@ -173,6 +197,12 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                 total_steps += 1
                 if max_steps is not None and total_steps == max_steps:
                     break
+
+            # Log train accuracy for this epoch
+            acc_per_class, acc_total = util.calculate_accuracies(class_prediction)
+            for key in class_prediction.keys():
+                writer.add_scalar("acc/" + key, acc_per_class, epoch*len(train_dataloader))
+            writer.add_scalar("acc/total", acc_total, epoch*len(train_dataloader))
 
             if max_steps is not None and total_steps == max_steps:
                 break
