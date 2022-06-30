@@ -347,5 +347,5 @@ def calculate_accuracies(class_prediction, as_list=False):
         else:
             acc_per_class[key] = np.mean(class_prediction[key])
 
-        all_predictions = np.append(acc_total, class_prediction[key])
+        all_predictions = np.append(all_predictions, class_prediction[key])
     return acc_per_class, np.mean(all_predictions)
