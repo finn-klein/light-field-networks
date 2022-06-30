@@ -338,7 +338,7 @@ def calculate_accuracies(class_prediction, as_list=False):
     if as_list:
         acc_per_class = []
     else:
-        acc_per_class = defaultdict(float)
+        acc_per_class = collections.defaultdict(float)
 
     all_predictions = []
     for key in class_prediction.keys():
