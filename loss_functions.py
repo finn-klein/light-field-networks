@@ -1,5 +1,5 @@
 import torch.nn as nn
-import torch.Size as Size
+from torch import Size
 
 
 def image_loss(model_out, gt, mask=None):
