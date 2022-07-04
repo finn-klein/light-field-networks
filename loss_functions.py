@@ -7,6 +7,9 @@ def image_loss(model_out, gt, mask=None):
 
 def class_loss(model_out, gt, mask=None):
     gt_class = gt['class'].long().squeeze()
+    # Add dimension if squeezed tensor is scalar (e.g. if batch_size is 1, which holds during validation)
+    if gt_class.shape == torch.Size([]):
+        gt_class = gt_class.unsqueeze(0)
     pred_class = model_out['class']
 
     max_index = pred_class.max(dim=1)[1]
