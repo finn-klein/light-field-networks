@@ -49,9 +49,11 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
 
     if isinstance(dataloaders, tuple):
         train_dataloader, val_dataloader = dataloaders
+        assert val_dataloader is not None, "validation dataloader is None"
         assert val_loss_fn is not None, "If validation set is passed, have to pass a validation loss_fn!"
     else:
         train_dataloader, val_dataloader = dataloaders, None
+    print(f"val_dataloader: {len(val_dataloader)}")
 
     if rank==0:
         if os.path.exists(model_dir):
@@ -88,7 +90,7 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
 
                 model_output = model(model_input)
 
-                ##### LOSS ######
+                ##### TRAIN LOSS ######
                 losses, loss_summaries = loss_fn(model_output, gt, model=model)
                 train_loss = 0.
                 for loss_name, loss in losses.items():
@@ -106,11 +108,10 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                 if rank == 0:
                     writer.add_scalar("loss/total_train_loss", train_loss, total_steps)
 
-                ##### ACCURACY #####
+                ##### TRAIN ACCURACY #####
                 for i in range(gt['class'].shape[0]): # gt is a batch of samples -> need to iterate through dimension 0
                     obj_class = int(gt['class'][i].cpu().numpy())
                     predicted_class = int(np.argmax(model_output['class'][i].detach().cpu().numpy()))
-                    predicted_class = multiclass_dataio.class2string_dict[predicted_class]
                     is_class_correct = 1 if predicted_class == obj_class else 0
                     class_prediction[obj_class].append(is_class_correct)
 
@@ -167,7 +168,6 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                                 ##### ACCURACY #####
                                 obj_class = int(gt['class'].cpu().numpy())
                                 predicted_class = int(np.argmax(model_output['class'].cpu().numpy()))
-                                predicted_class = multiclass_dataio.class2string_dict[predicted_class]
                                 is_class_correct = 1 if predicted_class == obj_class else 0
                                 val_class_prediction[obj_class].append(is_class_correct)
 
@@ -179,12 +179,14 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                             for key in val_class_prediction.keys():
                                 writer.add_scalar("val_acc/" + key, acc_per_class[key], total_steps)
                             writer.add_scalar("val_acc/total", acc_total, total_steps)
+                            #TODO: validation accuracies are not being logged - why? -Finn
 
                             for loss_name, loss in val_losses.items():
                                 single_loss = np.mean(np.concatenate([l.reshape(-1).cpu().numpy() for l in loss], axis=0))
 
                                 if rank == 0:
                                     writer.add_scalar('loss/val_' + loss_name, single_loss, total_steps)
+                                    #TODO: validation loss is not being logged - why? -Finn
 
                             if rank == 0:
                                 if val_summary_fn is not None:
