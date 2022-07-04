@@ -177,7 +177,7 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                             # Log validation accuracy
                             acc_per_class, acc_total = util.calculate_accuracies(val_class_prediction)
                             for key in val_class_prediction.keys():
-                                writer.add_scalar("val_acc/" + key, acc_per_class[key], total_steps)
+                                writer.add_scalar("val_acc/" + multiclass_dataio.class2string_dict[key], acc_per_class[key], total_steps)
                             writer.add_scalar("val_acc/total", acc_total, total_steps)
                             #TODO: validation accuracies are not being logged - why? -Finn
 
@@ -205,7 +205,7 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
             # Log train accuracy for this epoch
             acc_per_class, acc_total = util.calculate_accuracies(class_prediction)
             for key in class_prediction.keys():
-                writer.add_scalar("acc/" + str(key), acc_per_class[key], epoch*len(train_dataloader))
+                writer.add_scalar("acc/" + multiclass_dataio.class2string_dict[key], acc_per_class[key], epoch*len(train_dataloader))
             writer.add_scalar("acc/total", acc_total, epoch*len(train_dataloader))
 
             if max_steps is not None and total_steps == max_steps:
