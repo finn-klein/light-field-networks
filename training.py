@@ -203,10 +203,11 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                     break
 
             # Log train accuracy for this epoch
-            acc_per_class, acc_total = util.calculate_accuracies(class_prediction)
-            for key in class_prediction.keys():
-                writer.add_scalar("acc/" + multiclass_dataio.class2string_dict[key], acc_per_class[key], epoch*len(train_dataloader))
-            writer.add_scalar("acc/total", acc_total, epoch*len(train_dataloader))
+            if rank == 0:
+                acc_per_class, acc_total = util.calculate_accuracies(class_prediction)
+                for key in class_prediction.keys():
+                    writer.add_scalar("acc/" + multiclass_dataio.class2string_dict[key], acc_per_class[key], epoch*len(train_dataloader))
+                writer.add_scalar("acc/total", acc_total, epoch*len(train_dataloader))
 
             if max_steps is not None and total_steps == max_steps:
                 break
