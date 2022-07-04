@@ -50,6 +50,7 @@ def sync_model(model):
 
 
 def multigpu_train(gpu, opt, cache):
+    print(opt)
     if opt.gpus > 1:
         dist.init_process_group(backend='nccl', init_method='tcp://localhost:1492', world_size=opt.gpus, rank=gpu)
 
