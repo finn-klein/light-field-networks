@@ -109,7 +109,7 @@ def multigpu_train(gpu, opt, cache):
                                  overwrite=True,
                                  rank=gpu, train_function=training.train, gpus=opt.gpus,
                                  optimizers = [optimizer] if optimizer is not None else None,
-                                 batches_per_validation=200)
+                                 batches_per_validation=2560)
 
 if __name__ == "__main__":
     manager = Manager()
