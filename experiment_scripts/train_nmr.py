@@ -104,7 +104,8 @@ def multigpu_train(gpu, opt, cache):
                                  iters_til_checkpoint=opt.iters_til_ckpt, summary_fn=summary_fn,
                                  overwrite=True,
                                  rank=gpu, train_function=training.train, gpus=opt.gpus,
-                                 optimizers = [optimizer] if optimizer is not None else None)
+                                 optimizers = [optimizer] if optimizer is not None else None,
+                                 batches_per_validation=200)
 
 if __name__ == "__main__":
     manager = Manager()

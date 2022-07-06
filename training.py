@@ -179,14 +179,12 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                             for key in val_class_prediction.keys():
                                 writer.add_scalar("val_acc/" + multiclass_dataio.class2string_dict[key], acc_per_class[key], total_steps)
                             writer.add_scalar("val_acc/total", acc_total, total_steps)
-                            #TODO: validation accuracies are not being logged - why? -Finn
 
                             for loss_name, loss in val_losses.items():
                                 single_loss = np.mean(np.concatenate([l.reshape(-1).cpu().numpy() for l in loss], axis=0))
 
                                 if rank == 0:
                                     writer.add_scalar('loss/val_' + loss_name, single_loss, total_steps)
-                                    #TODO: validation loss is not being logged - why? -Finn
 
                             if rank == 0:
                                 if val_summary_fn is not None:
