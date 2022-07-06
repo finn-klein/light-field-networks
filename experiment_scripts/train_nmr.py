@@ -87,6 +87,10 @@ def multigpu_train(gpu, opt, cache):
             optimizer = torch.optim.Adam(lr=opt.lr, params=model.parameters())
             optimizer_state_dict = torch.load(opt.optimizer_checkpoint_path)
             optimizer.load_state_dict(optimizer_state_dict)
+        else:
+            optimizer = None
+    else:
+        optimizer = None
 
     if opt.gpus > 1:
         sync_model(model)
