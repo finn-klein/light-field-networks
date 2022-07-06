@@ -53,7 +53,6 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
         assert val_loss_fn is not None, "If validation set is passed, have to pass a validation loss_fn!"
     else:
         train_dataloader, val_dataloader = dataloaders, None
-    print(f"val_dataloader: {len(val_dataloader)}")
 
     if rank==0:
         if os.path.exists(model_dir):
