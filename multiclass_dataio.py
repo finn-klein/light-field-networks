@@ -97,6 +97,7 @@ class SceneInstanceDataset():
             "class": self.instance_class,
             "instance_name": self.instance_name
         }
+        # indexing a SceneInstanceDataset with different idcs yields different poses. -Finn
         return sample
 
 
@@ -303,6 +304,7 @@ class SceneClassDataset(torch.utils.data.Dataset):
                 sample_idcs = np.random.choice(len(self.all_instances[obj_idx]), replace=False,
                                                size=self.num_context+self.num_trgt)
             except:
+                # Select (num_context+num_trgt) many random poses
                 sample_idcs = np.random.choice(len(self.all_instances[obj_idx]), replace=True,
                                                size=self.num_context+self.num_trgt)
 
