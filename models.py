@@ -209,8 +209,6 @@ class LFAutoDecoder(LightFieldModel):
                 loss.backward()
                 optimizer.step()
 
-                print(latent_codes.weight)
-
                 if iter % 10 == 0:
                     print(f"Inference iter {iter}, loss {loss}.")
         pred_class = self.linear_classifier(latent_codes.weight)
