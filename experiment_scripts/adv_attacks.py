@@ -60,7 +60,7 @@ dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
                           drop_last=True, num_workers=0)
 
 print("Initializing model")
-model = LFAutoDecoder(latent_dim=256, num_instances=train_dataset.num_instances, classify=True).cuda()
+model = LFAutoDecoder(latent_dim=256, num_instances=train_dataset.num_instances, classify=True, lr=lr).cuda()
 model.eval()
 
 if opt.checkpoint_path is not None:

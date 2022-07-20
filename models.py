@@ -206,7 +206,7 @@ class LFAutoDecoder(LightFieldModel):
                 loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(self.latent_codes.weight**2)
                 loss.backward()
 
-                optimizer = torch.optim.Adam(params = self.latent_codes.weight, lr = kwargs['lr'])
+                optimizer = torch.optim.Adam(params = self.latent_codes.weight, lr = self.lr)
                 optimizer.step()
 
                 if iter % 10 == 0:
