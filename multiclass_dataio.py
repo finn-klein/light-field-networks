@@ -169,7 +169,8 @@ class SceneClassDataset(torch.utils.data.Dataset):
                  test=False,
                  test_context_idcs=None,
                  cache=None,
-                 viewlist=None):
+                 viewlist=None,
+                 specific_classes=None):
 
         self.num_context = num_context
         self.num_trgt = num_trgt
@@ -179,6 +180,7 @@ class SceneClassDataset(torch.utils.data.Dataset):
         self.cache = cache
         self.test = test
         self.test_context_idcs = test_context_idcs
+        self.specific_classes = specific_classes
 
         if viewlist is not None:
             with open(viewlist, "r") as f:
@@ -189,6 +191,9 @@ class SceneClassDataset(torch.utils.data.Dataset):
             }
 
         object_classes = sorted(glob(os.path.join(root_dir, "*/")))
+        if self.specific_classes is not None:
+            # Select only those classes of which a substring appears in the list of specific classes
+            object_classes = [x for x in object_classes if any([y in x for y in self.specific_classes])]
         all_objects = []
         for object_class in object_classes:
             file_list = open(object_class + 'softras_' + dataset_type + ".lst", "r")
