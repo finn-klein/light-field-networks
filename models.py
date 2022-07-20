@@ -155,7 +155,6 @@ class LightFieldModel(nn.Module):
 
         out_dict['rgb'] = rgb
 
-        # might be smarter to move this to the child class where self.linear_classifier is defined -Finn
         pred_class = self.linear_classifier(z)
         out_dict['class'] = pred_class
         return out_dict
@@ -206,6 +205,9 @@ class LFAutoDecoder(LightFieldModel):
 
                 loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(self.latent_codes.weight**2)
                 loss.backward()
+
+                optimizer = torch.optim.Adam(params = self.latent_codes.weight, lr = kwargs['lr'])
+                optimizer.step()
 
                 if iter % 10 == 0:
                     print(f"Inference iter {iter}, loss {loss}.")
