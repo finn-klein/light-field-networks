@@ -26,8 +26,7 @@ p.add_argument('--lr', type=float, default=1e-3)
 p.add_argument('--img_sidelength', type=int, default=64, required=False)
 p.add_argument('--batch_size', type=int, default=20)
 p.add_argument('--num_inference_iters', type=int, default=150)
-p.add_argument('--data_root',
-               default=config.nmr_root, required=False)
+p.add_argument('--data_root', required=True)
                # default='/om2/user/egger/MultiClassSRN/data/NMR_SmallDatasetForIOTesting')
 p.add_argument('--set', default='test')
 p.add_argument('--checkpoint_path', type=str,
