@@ -197,7 +197,6 @@ class LFAutoDecoder(LightFieldModel):
             nn.init.zeros_(latent_codes.weight)
 
             optimizer = torch.optim.Adam(params = [self.latent_codes.weight], lr = self.lr)
-            optimizer.zero_grad()
 
             for iter in range(self.num_iters):
                 light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
