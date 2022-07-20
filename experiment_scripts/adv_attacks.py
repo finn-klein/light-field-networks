@@ -3,6 +3,7 @@ import sys
 import os
 sys.path.append( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
+sys.path.append("../../foolbox")
 import foolbox as fb
 import configargparse
 import os, time, datetime
@@ -42,7 +43,6 @@ if opt.specific_observation_idcs is not None:
     specific_observation_idcs = util.parse_comma_separated_integers(opt.specific_observation_idcs)
 else:
     specific_observation_idcs = None
-
 
 #Classes that are being detected by LFN with accuracy >90%:
 selected_class_str = ["02691156", "04256520", "04530566", "03211117"]
