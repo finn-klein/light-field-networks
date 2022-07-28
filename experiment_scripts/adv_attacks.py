@@ -70,46 +70,53 @@ if opt.checkpoint_path is not None:
     model.load_state_dict(state_dict, strict=False)
 
 fmodel = fb.PyTorchModel(model, bounds=(-1, 1))
-model_input, ground_truth = next(iter(dataloader)) # Dictionary
-inputs = model_input # (b, sidelength**2, 3)
-rgb = model_input['query']['rgb'].cuda()
-intrinsics = model_input['query']['intrinsics'].cuda()
-pose = model_input['query']['cam2world'].cuda()
-uv = model_input['query']['uv'].cuda().float()
-labels = model_input['query']['class'].squeeze().cuda() # (b)
 
-model.pose = pose
-model.intrinsics = intrinsics
-model.uv = uv
-model.num_iters = opt.num_inference_iters
-model.lr = opt.lr
+robust_accs = list()
+for model_input, ground_truth in iter(dataloader):
+    #model_input, ground_truth = next(iter(dataloader)) # Dictionary
+    inputs = model_input # (b, sidelength**2, 3)
+    rgb = model_input['query']['rgb'].cuda()
+    intrinsics = model_input['query']['intrinsics'].cuda()
+    pose = model_input['query']['cam2world'].cuda()
+    uv = model_input['query']['uv'].cuda().float()
+    labels = model_input['query']['class'].squeeze().cuda() # (b)
 
-#attack = fb.attacks.GenAttack()
-print('labels', labels)
-print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %")
-attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
+    model.pose = pose
+    model.intrinsics = intrinsics
+    model.uv = uv
+    model.num_iters = opt.num_inference_iters
+    model.lr = opt.lr
 
-epsilons = [
-    0.0,
-    0.0002,
-    0.0005,
-    0.0008,
-    0.001,
-    0.0015,
-    0.002,
-    0.003,
-    0.01,
-    0.1,
-    0.3,
-    0.5,
-    1.0,
-]
-# epsilons = [1.0]
-print('labels', labels.size())
-raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
-robust_accuracy = 1 - success.float().mean(axis=-1)
+    #attack = fb.attacks.GenAttack()
+    print('labels', labels)
+    print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %")
+    attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
+
+    epsilons = [
+        0.0,
+        0.0002,
+        0.0005,
+        0.0008,
+        0.001,
+        0.0015,
+        0.002,
+        0.003,
+        0.01,
+        0.1,
+        0.3,
+        0.5,
+        1.0,
+    ]
+    # epsilons = [1.0]
+    print('labels', labels.size())
+    raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
+    robust_accuracy = 1 - success.float().mean(axis=-1)
+    robust_accs.append(robust_accuracy)
+
+robust_acc_total = np.mean(robust_accs, axis=0)
+
 print("robust accuracy for perturbations with")
-for eps, acc in zip(epsilons, robust_accuracy):
+for eps, acc in zip(epsilons, robust_acc_total):
     print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
 print()
 print("we can also manually check this:")
