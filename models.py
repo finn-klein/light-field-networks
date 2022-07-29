@@ -212,6 +212,7 @@ class LFAutoDecoder(LightFieldModel):
                 if iter % 100 == 0:
                     print(f"Inference iter {iter}, loss {loss}.")
         pred_class = self.linear_classifier(latent_codes.weight)
+        print("predictions", pred_class)
         return pred_class
 
     def forward_classify(self, images):
