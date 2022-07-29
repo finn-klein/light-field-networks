@@ -170,7 +170,8 @@ class SceneClassDataset(torch.utils.data.Dataset):
                  test_context_idcs=None,
                  cache=None,
                  viewlist=None,
-                 specific_classes=None):
+                 specific_classes=None,
+                 num_instances_per_class=None):
 
         self.num_context = num_context
         self.num_trgt = num_trgt
@@ -181,6 +182,7 @@ class SceneClassDataset(torch.utils.data.Dataset):
         self.test = test
         self.test_context_idcs = test_context_idcs
         self.specific_classes = specific_classes
+        self.num_instances_per_class = num_instances_per_class
 
         if viewlist is not None:
             with open(viewlist, "r") as f:
@@ -201,6 +203,8 @@ class SceneClassDataset(torch.utils.data.Dataset):
             content_list = content.split("\n")
             content_list.pop() # remove last element since that is empty after newline
             content_list = [object_class + sub for sub in content_list] #appends path to every entry
+            if self.num_instances_per_class is not None:
+                content_list = content_list[:self.num_instances_per_class]
             file_list.close()
             all_objects.append(content_list)
         all_objects = [y for x in all_objects for y in x] #just flattens the list

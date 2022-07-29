@@ -24,7 +24,7 @@ p.add('-c', '--config_filepath', required=False, is_config_file=True)
 
 p.add_argument('--lr', type=float, default=1e-3)
 p.add_argument('--img_sidelength', type=int, default=64, required=False)
-p.add_argument('--batch_size', type=int, default=20)
+p.add_argument('--batch_size', type=int, default=256)
 p.add_argument('--num_inference_iters', type=int, default=150)
 p.add_argument('--data_root', required=True)
                # default='/om2/user/egger/MultiClassSRN/data/NMR_SmallDatasetForIOTesting')
@@ -34,6 +34,7 @@ p.add_argument('--checkpoint_path', type=str,
 p.add_argument('--specific_observation_idcs', type=str, default=None)
 p.add_argument('--max_num_instances', type=int, default=-1)
 p.add_argument('--max_num_observations', type=int, default=50, required=False)
+p.add_argument('--num_instances_per_class', type=int, required=False)
 opt = p.parse_args()
 
 lr = opt.lr
@@ -43,6 +44,11 @@ if opt.specific_observation_idcs is not None:
     specific_observation_idcs = util.parse_comma_separated_integers(opt.specific_observation_idcs)
 else:
     specific_observation_idcs = None
+
+if opt.num_instances_per_class is not None:
+    num_instances_per_class = opt.num_instances_per_class
+else:
+    num_instances_per_class = None
 
 #Classes that are being detected by LFN with accuracy >90%:
 selected_class_str = ["02691156", "04256520", "04530566", "03211117"]
@@ -55,7 +61,8 @@ train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
                                                     max_num_instances=opt.max_num_instances,
                                                     # max_num_observations_per_instance=opt.max_num_observations_train,
                                                     dataset_type=opt.set,
-                                                    specific_classes=selected_class_str)
+                                                    specific_classes=selected_class_str,
+                                                    num_instances_per_class=num_instances_per_class)
 dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
                           drop_last=True, num_workers=0)
 
@@ -113,8 +120,16 @@ for model_input, ground_truth in iter(dataloader):
     robust_accuracy = 1 - success.float().mean(axis=-1)
     robust_accs.append(robust_accuracy)
 
+    print("robust accuracy for perturbations with")
+    for eps, acc in zip(epsilons, robust_accuracy):
+        print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
+    print()
+
 robust_acc_total = np.mean(robust_accs, axis=0)
 
+print("#"*10 + "\n")
+print("Summary: \n")
+print("#"*10 + "\n")
 print("robust accuracy for perturbations with")
 for eps, acc in zip(epsilons, robust_acc_total):
     print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
