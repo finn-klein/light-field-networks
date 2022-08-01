@@ -51,7 +51,8 @@ else:
     num_instances_per_class = None
 
 #Classes that are being detected by LFN with accuracy >90%:
-selected_class_str = ["02691156", "04256520", "04530566", "03211117"]
+#selected_class_str = ["02691156", "04256520", "04530566", "03211117"]
+selected_class_str = ["04256520"]
 
 print("Loading dataset")
 train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
