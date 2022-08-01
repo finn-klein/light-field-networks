@@ -53,7 +53,7 @@ else:
 
 #Classes that are being detected by LFN with accuracy >90%:
 #selected_class_str = ["02691156", "04256520", "04530566", "03211117"]
-if opts.single_class_string != None:
+if opt.single_class_string != None:
     selected_class_str = [opts.single_class_string]
 else:
     selected_class_str = None
