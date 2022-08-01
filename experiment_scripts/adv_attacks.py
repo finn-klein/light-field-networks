@@ -130,7 +130,7 @@ for model_input, ground_truth in iter(dataloader):
         print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
     print()
 
-robust_acc_total = np.mean(robust_accs, axis=0)
+robust_acc_total = robust_accs.mean(axis=0)
 
 print("#"*10 + "\n")
 print("Summary: \n")
