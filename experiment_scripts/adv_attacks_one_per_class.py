@@ -34,7 +34,7 @@ p.add_argument('--checkpoint_path', type=str,
 p.add_argument('--specific_observation_idcs', type=str, default=None)
 p.add_argument('--max_num_instances', type=int, default=-1)
 p.add_argument('--max_num_observations', type=int, default=50, required=False)
-p.add_argument('--num_instances_per_class', type=int, required=False)
+p.add_argument('--num_instances_per_class', type=int, required=True)
 p.add_argument('--single_class_string', type=str, required=False)
 opt = p.parse_args()
 
@@ -61,7 +61,7 @@ else:
 all_classes = multiclass_dataio.string2class_dict.keys()
 
 print("Initializing model")
-model = LFAutoDecoder(latent_dim=256, num_instances=opt.max_num_instances, classify=True).cuda()
+model = LFAutoDecoder(latent_dim=256, num_instances=opt.max_num_instances_per_class, classify=True).cuda()
 model.eval()
 
 if opt.checkpoint_path is not None:
