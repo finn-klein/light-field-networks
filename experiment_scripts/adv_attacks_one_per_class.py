@@ -61,7 +61,7 @@ else:
 all_classes = multiclass_dataio.string2class_dict.keys()
 
 print("Initializing model")
-model = LFAutoDecoder(latent_dim=256, num_instances=train_dataset.num_instances, classify=True).cuda()
+model = LFAutoDecoder(latent_dim=256, num_instances=opt.max_num_instances, classify=True).cuda()
 model.eval()
 
 if opt.checkpoint_path is not None:
