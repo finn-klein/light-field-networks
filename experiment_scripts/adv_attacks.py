@@ -35,6 +35,7 @@ p.add_argument('--specific_observation_idcs', type=str, default=None)
 p.add_argument('--max_num_instances', type=int, default=-1)
 p.add_argument('--max_num_observations', type=int, default=50, required=False)
 p.add_argument('--num_instances_per_class', type=int, required=False)
+p.add_argument('--single_class_string', type=str, required=False)
 opt = p.parse_args()
 
 lr = opt.lr
@@ -52,7 +53,10 @@ else:
 
 #Classes that are being detected by LFN with accuracy >90%:
 #selected_class_str = ["02691156", "04256520", "04530566", "03211117"]
-selected_class_str = ["04256520"]
+if opts.single_class_string != None:
+    selected_class_str = [opts.single_class_string]
+else:
+    selected_class_str = None
 
 print("Loading dataset")
 train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
