@@ -81,7 +81,7 @@ for class_id in all_classes:
                                                         max_num_instances=opt.max_num_instances,
                                                         # max_num_observations_per_instance=opt.max_num_observations_train,
                                                         dataset_type=opt.set,
-                                                        specific_classes=selected_class_str,
+                                                        specific_classes=class_id,
                                                         num_instances_per_class=num_instances_per_class)
     dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
                             drop_last=True, num_workers=0)
