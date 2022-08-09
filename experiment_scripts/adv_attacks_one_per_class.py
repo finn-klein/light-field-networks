@@ -77,7 +77,7 @@ fmodel = fb.PyTorchModel(model, bounds=(-1, 1))
 
 # for class_id in all_classes:
 # dummy
-class_id = class_ids[9]
+class_id = all_classes[9]
 print(f"Loading dataset for class {class_id}")
 train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
                                                     root_dir=opt.data_root, query_sparsity=None,
