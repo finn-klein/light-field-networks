@@ -11,6 +11,8 @@ import custom_layers
 import geometry
 import hyperlayers
 
+from torch.optim.lr_scheduler import LambdaLR
+
 
 class LightFieldModel(nn.Module):
     def __init__(self, latent_dim, parameterization='plucker', network='relu',
