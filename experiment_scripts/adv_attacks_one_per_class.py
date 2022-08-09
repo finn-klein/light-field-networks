@@ -122,6 +122,7 @@ for class_id in all_classes:
         0.5,
         1.0,
     ]
+    epsilons *= 255
     # epsilons = [1.0]
     print('labels', labels.size())
     raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
