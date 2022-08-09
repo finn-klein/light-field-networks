@@ -75,64 +75,62 @@ if opt.checkpoint_path is not None:
 
 fmodel = fb.PyTorchModel(model, bounds=(-1, 1))
 
-# for class_id in all_classes:
-# dummy
-class_id = all_classes[9]
-print(f"Loading dataset for class {class_id}")
-train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
-                                                    root_dir=opt.data_root, query_sparsity=None,
-                                                    img_sidelength=opt.img_sidelength, vary_context_number=True,
-                                                    specific_observation_idcs=specific_observation_idcs, cache=None,
-                                                    max_num_instances=max_num_instances,
-                                                    # max_num_observations_per_instance=opt.max_num_observations_train,
-                                                    dataset_type=opt.set,
-                                                    specific_classes=[class_id],
-                                                    num_instances_per_class=num_instances_per_class)
-dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
-                        drop_last=True, num_workers=0)
+for class_id in all_classes:
+    print(f"Loading dataset for class {class_id} (index {multiclass_dataio.string2class_dict[class_id]})")
+    train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
+                                                        root_dir=opt.data_root, query_sparsity=None,
+                                                        img_sidelength=opt.img_sidelength, vary_context_number=True,
+                                                        specific_observation_idcs=specific_observation_idcs, cache=None,
+                                                        max_num_instances=max_num_instances,
+                                                        # max_num_observations_per_instance=opt.max_num_observations_train,
+                                                        dataset_type=opt.set,
+                                                        specific_classes=[class_id],
+                                                        num_instances_per_class=num_instances_per_class)
+    dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
+                            drop_last=True, num_workers=0)
 
-model_input, ground_truth = next(iter(dataloader)) # Dictionary
-inputs = model_input # (b, sidelength**2, 3)
-rgb = model_input['query']['rgb'].cuda()
-intrinsics = model_input['query']['intrinsics'].cuda()
-pose = model_input['query']['cam2world'].cuda()
-uv = model_input['query']['uv'].cuda().float()
-labels = model_input['query']['class'].squeeze().cuda() # (b)
+    model_input, ground_truth = next(iter(dataloader)) # Dictionary
+    inputs = model_input # (b, sidelength**2, 3)
+    rgb = model_input['query']['rgb'].cuda()
+    intrinsics = model_input['query']['intrinsics'].cuda()
+    pose = model_input['query']['cam2world'].cuda()
+    uv = model_input['query']['uv'].cuda().float()
+    labels = model_input['query']['class'].squeeze().cuda() # (b)
 
-model.pose = pose
-model.intrinsics = intrinsics
-model.uv = uv
-model.num_iters = opt.num_inference_iters
-model.lr = opt.lr
+    model.pose = pose
+    model.intrinsics = intrinsics
+    model.uv = uv
+    model.num_iters = opt.num_inference_iters
+    model.lr = opt.lr
 
-#attack = fb.attacks.GenAttack()
-print('labels', labels)
-print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %")
-attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
+    #attack = fb.attacks.GenAttack()
+    print('labels', labels)
+    print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %")
+    attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
 
-epsilons = [
-    0.0002,
-    0.0005,
-    0.0008,
-    0.001,
-    0.0015,
-    0.002,
-    0.003,
-    0.01,
-    0.1,
-    0.3,
-    0.5,
-    1.0,
-]
-# epsilons = [1.0]
-print('labels', labels.size())
-raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
-robust_accuracy = 1 - success.float().mean(axis=-1)
+    epsilons = [
+        0.0002,
+        0.0005,
+        0.0008,
+        0.001,
+        0.0015,
+        0.002,
+        0.003,
+        0.01,
+        0.1,
+        0.3,
+        0.5,
+        1.0,
+    ]
+    # epsilons = [1.0]
+    print('labels', labels.size())
+    raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
+    robust_accuracy = 1 - success.float().mean(axis=-1)
 
-print(f"robust accuracy for class {class_id} and perturbations with")
-for eps, acc in zip(epsilons, robust_accuracy):
-    print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
-print()
+    print(f"robust accuracy for class {class_id} and perturbations with")
+    for eps, acc in zip(epsilons, robust_accuracy):
+        print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
+    print()
 
 # robust_acc_total = robust_accs.mean(axis=0)
 
