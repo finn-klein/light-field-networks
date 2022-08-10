@@ -179,7 +179,7 @@ class LFAutoDecoder(LightFieldModel):
 
         if classify:
             self.forward = self.forward_classify
-        if out_path:
+        if out_path is not None:
             self.out_path = out_path
 
     def get_z(self, input, val=False):
