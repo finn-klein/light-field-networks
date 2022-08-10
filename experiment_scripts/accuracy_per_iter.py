@@ -54,8 +54,11 @@ else:
     num_instances_per_class = None
     max_num_instances = opt.max_num_instances
 
+class_id = multiclass_dataio.class2string_dict[int(opt.single_class_index)]
+out_path = opt.logging_root + "/" + class_id + ".txt"
+
 print("Initializing model")
-model = LFAutoDecoder(latent_dim=256, num_instances=opt.num_instances_per_class, classify=True, ).cuda()
+model = LFAutoDecoder(latent_dim=256, num_instances=opt.num_instances_per_class, classify=True, out_path=out_path).cuda()
 model.eval()
 
 if opt.checkpoint_path is not None:
@@ -64,8 +67,6 @@ if opt.checkpoint_path is not None:
     del state_dict['latent_codes.weight']
     model.load_state_dict(state_dict, strict=False)
 
-class_id = multiclass_dataio.class2string_dict[int(opt.single_class_index)]
-out_path = opt.logging_root + "/" + class_id + ".txt"
 print(f"Loading dataset for class {class_id} (index {multiclass_dataio.string2class_dict[class_id]})")
 train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
                                                     root_dir=opt.data_root, query_sparsity=None,
