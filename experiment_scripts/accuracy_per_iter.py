@@ -22,7 +22,7 @@ import util
 p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True)
 
-p.add_argument('--logging_root', required=True, default="/home/vault/iwi9/iwi9015h/light_fields/acc_per_iter")
+p.add_argument('--logging_root', required=False, default="/home/vault/iwi9/iwi9015h/light_fields/acc_per_iter")
 p.add_argument('--lr', type=float, default=1e-3)
 p.add_argument('--img_sidelength', type=int, default=64, required=False)
 p.add_argument('--batch_size', type=int, default=256)
