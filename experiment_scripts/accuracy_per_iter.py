@@ -88,4 +88,4 @@ uv = model_input['query']['uv'].cuda().float()
 labels = model_input['query']['class'].squeeze().cuda() # (b)
 
 # inference with logging
-_ = model(rgb, pose, intrinsics, uv, labels=labels)
+model.infer_and_classify(rgb, pose, intrinsics, uv, labels=labels)
