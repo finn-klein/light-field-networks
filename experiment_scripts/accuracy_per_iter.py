@@ -88,5 +88,11 @@ pose = model_input['query']['cam2world'].cuda()
 uv = model_input['query']['uv'].cuda().float()
 labels = model_input['query']['class'].squeeze().cuda() # (b)
 
+model.pose = pose
+model.intrinsics = intrinsics
+model.uv = uv
+model.num_iters = opt.num_inference_iters
+model.lr = opt.lr
+
 # inference with logging
 model.infer_and_classify(rgb, pose, intrinsics, uv, labels=labels)
