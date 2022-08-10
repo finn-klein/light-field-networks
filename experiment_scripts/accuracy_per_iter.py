@@ -54,11 +54,6 @@ else:
     num_instances_per_class = None
     max_num_instances = opt.max_num_instances
 
-if opt.single_class_string != None:
-    selected_class_str = [opt.single_class_string]
-else:
-    selected_class_str = None
-
 print("Initializing model")
 model = LFAutoDecoder(latent_dim=256, num_instances=opt.num_instances_per_class, classify=True, ).cuda()
 model.eval()
