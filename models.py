@@ -163,7 +163,7 @@ class LightFieldModel(nn.Module):
 
 
 class LFAutoDecoder(LightFieldModel):
-    def __init__(self, latent_dim, num_instances, parameterization='plucker', classify=False, **kwargs):
+    def __init__(self, latent_dim, num_instances, parameterization='plucker', classify=False, out_path=None, **kwargs):
         super().__init__(latent_dim=latent_dim, parameterization=parameterization, **kwargs)
         self.num_instances = num_instances
 
@@ -179,19 +179,24 @@ class LFAutoDecoder(LightFieldModel):
 
         if classify:
             self.forward = self.forward_classify
+        if out_path:
+            self.out_path = out_path
 
     def get_z(self, input, val=False):
         instance_idcs = input['query']["instance_idx"].long()
         z = self.latent_codes(instance_idcs)
         return z
 
-    def infer_and_classify(self, rgb, pose, intrinsics, uv):
+    def infer_and_classify(self, rgb, pose, intrinsics, uv, labels=None):
         b, n_ctxt = uv.shape[:2]
         n_qry, n_pix = uv.shape[1:3]
 
         pose = util.flatten_first_two(pose)
         intrinsics = util.flatten_first_two(intrinsics)
         uv = util.flatten_first_two(uv)
+
+        if self.out_path is not None:
+            f = open(self.out_path, "a")
 
         with torch.enable_grad():
             num_instances = rgb.shape[0]
@@ -216,10 +221,18 @@ class LFAutoDecoder(LightFieldModel):
                 optimizer.step()
                 scheduler.step()
 
+                if self.out_path is not None and labels is not None and iter % 50 == 0:
+                    with torch.no_grad():
+                        pred_class = self.linear_classifier(latent_codes.weight).argmax(axis=-1)
+                        acc = float((pred_class == labels).float().mean(axis=-1).cpu())
+                        f.write(f"iter {iter}: {acc}\n")
+
                 if iter % 100 == 0:
                     print(f"Inference iter {iter}, loss {loss}.")
         pred_class = self.linear_classifier(latent_codes.weight)
         print("predictions", pred_class.argmax(axis=-1))
+        if self.out_path is not None:
+            f.close()
         return pred_class
 
     def forward_classify(self, images):
