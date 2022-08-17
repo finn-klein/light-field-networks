@@ -39,7 +39,7 @@ p.add_argument('--spec_observation_idcs', type=str, default=None)
 
 p.add_argument('--single_class_string', default=None)
 p.add_argument('--disable_shuffle', default=None)
-p.add_argument('--num_instances_per_class', default=None)
+p.add_argument('--num_instances_per_class', type=int, default=None)
 opt = p.parse_args()
 
 
