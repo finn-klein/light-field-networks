@@ -36,6 +36,10 @@ p.add_argument('--epochs_til_ckpt', type=int, default=100)
 p.add_argument('--steps_til_summary', type=int, default=100)
 p.add_argument('--iters_til_ckpt', type=int, default=10000)
 p.add_argument('--spec_observation_idcs', type=str, default=None)
+
+p.add_argument('--single_class_string', default=None)
+p.add_argument('--disable_shuffle', default=None)
+p.add_argument('--num_instances_per_class', default=None)
 opt = p.parse_args()
 
 
@@ -63,8 +67,10 @@ def multigpu_train(gpu, opt, cache):
                                                             cache=cache, specific_observation_idcs=specific_observation_idcs,
                                                             max_num_instances=opt.max_num_instances,
                                                             dataset_type='test',
-                                                            viewlist=opt.viewlist)
-        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True,
+                                                            viewlist=opt.viewlist,
+                                                            specific_classes = opt.single_class_string,
+                                                            num_instances_per_class = opt.num_instances_per_class)
+        train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=(opt.disable_shuffle is None),
                                   drop_last=True, num_workers=0)
         return train_loader
     
