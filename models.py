@@ -203,8 +203,8 @@ class LFAutoDecoder(LightFieldModel):
             nn.init.zeros_(latent_codes.weight)
 
             optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = self.lr)
-            lr_schedule = lambda epoch: 0.1**(epoch/self.num_iters)
-            scheduler = LambdaLR(optimizer, lr_lambda=lr_schedule)
+            #lr_schedule = lambda epoch: 0.1**(epoch/self.num_iters)
+            #scheduler = LambdaLR(optimizer, lr_lambda=lr_schedule)
 
             for iter in range(self.num_iters):
                 light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
@@ -213,12 +213,12 @@ class LFAutoDecoder(LightFieldModel):
                 novel_views = lf_out[..., :3]
                 novel_views = novel_views.view(b, n_qry, n_pix, 3)
 
-                loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(latent_codes.weight**2)
+                loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(latent_codes.weight**2) * 100 # reg_weight = 100
 
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
-                scheduler.step()
+                #scheduler.step()
 
                 if self.out_path is not None and labels is not None and iter % 50 == 0:
                     with torch.no_grad():
