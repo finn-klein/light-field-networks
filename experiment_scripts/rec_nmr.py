@@ -42,6 +42,11 @@ p.add_argument('--disable_shuffle', default=None)
 p.add_argument('--num_instances_per_class', type=int, default=None)
 opt = p.parse_args()
 
+if opt.single_class_string is not None:
+    class_id = [multiclass_dataio.class2string_dict[int(opt.single_class_string)]]
+else:
+    class_id = None
+
 
 def sync_model(model):
     for param in model.parameters():
@@ -60,6 +65,7 @@ def multigpu_train(gpu, opt, cache):
     torch.cuda.set_device(gpu)
 
 
+
     def create_dataloader_callback(sidelength, batch_size, query_sparsity):
         train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                             root_dir=opt.data_root, query_sparsity=query_sparsity,
@@ -68,7 +74,7 @@ def multigpu_train(gpu, opt, cache):
                                                             max_num_instances=opt.max_num_instances,
                                                             dataset_type='test',
                                                             viewlist=opt.viewlist,
-                                                            specific_classes = opt.single_class_string,
+                                                            specific_classes = class_id,
                                                             num_instances_per_class = opt.num_instances_per_class)
         train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=(opt.disable_shuffle is None),
                                   drop_last=True, num_workers=0)
