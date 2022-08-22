@@ -64,8 +64,6 @@ def multigpu_train(gpu, opt, cache):
 
     torch.cuda.set_device(gpu)
 
-
-
     def create_dataloader_callback(sidelength, batch_size, query_sparsity):
         train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                             root_dir=opt.data_root, query_sparsity=query_sparsity,
