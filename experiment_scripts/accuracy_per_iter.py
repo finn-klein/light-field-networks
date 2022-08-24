@@ -68,7 +68,7 @@ if opt.checkpoint_path is not None:
     model.load_state_dict(state_dict, strict=False)
 
 print(f"Loading dataset for class {class_id} (index {multiclass_dataio.string2class_dict[class_id]})")
-train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
+train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                     root_dir=opt.data_root, query_sparsity=None,
                                                     img_sidelength=opt.img_sidelength, vary_context_number=True,
                                                     specific_observation_idcs=specific_observation_idcs, cache=None,
