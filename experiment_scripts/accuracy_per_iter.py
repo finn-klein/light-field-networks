@@ -77,7 +77,8 @@ train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                     dataset_type=opt.set,
                                                     specific_classes=[class_id],
                                                     num_instances_per_class=num_instances_per_class,
-                                                    test=True)
+                                                    test=True,
+                                                    test_context_idcs=[0])
 dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=True,
                         drop_last=True, num_workers=0)
 
