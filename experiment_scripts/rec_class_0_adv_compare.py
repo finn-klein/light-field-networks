@@ -40,6 +40,7 @@ p.add_argument('--spec_observation_idcs', type=str, default=None)
 p.add_argument('--single_class_string', default=None)
 p.add_argument('--disable_shuffle', default=None)
 p.add_argument('--num_instances_per_class', type=int, default=None)
+p.add_argument('--batch_size', type=int, default=64)
 opt = p.parse_args()
 
 if opt.single_class_string is not None:
@@ -100,7 +101,7 @@ def multigpu_train(gpu, opt, cache):
     optimizers = [torch.optim.Adam(lr=opt.lr, params=[p for _, p in model_params])]
 
     training.multiscale_training(model=model, dataloader_callback=create_dataloader_callback,
-                                 dataloader_iters=(1000000, ), dataloader_params=((64, 64, None), ),
+                                 dataloader_iters=(1000000, ), dataloader_params=((64, opt.batch_size, None), ),
                                  epochs=opt.num_epochs, lr=opt.lr, steps_til_summary=opt.steps_til_summary,
                                  epochs_til_checkpoint=opt.epochs_til_ckpt,
                                  model_dir=root_path, loss_fn=loss_fn,
