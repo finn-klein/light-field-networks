@@ -43,7 +43,7 @@ def multiscale_training(train_function, dataloader_callback, dataloader_iters, d
 def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss_fn, steps_til_summary=1,
           summary_fn=None, iters_til_checkpoint=None, clip_grad=False, val_loss_fn=None, val_summary_fn=None,
           overwrite=True, optimizers=None, batches_per_validation=10, gpus=1, rank=0, max_steps=None,
-          loss_schedules=None, device='gpu'):
+          loss_schedules=None, device='gpu', detailed_logging=False):
     if optimizers is None:
         optimizers = [torch.optim.Adam(lr=lr, params=model.parameters())]
 
@@ -82,7 +82,10 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
 
             class_prediction = defaultdict(list)
             for step, (model_input, gt) in enumerate(train_dataloader):
-
+                if detailed_logging:
+                    print("Epoch", epoch)
+                    print("Instance name:",(model_input['query']['instance_name'])
+                    print("Pose:", model_input['query']['cam2world'])
                 if device == 'gpu':
                     model_input = util.dict_to_gpu(model_input)
                     gt = util.dict_to_gpu(gt)
@@ -139,6 +142,12 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                 for optim in optimizers:
                     optim.step()
                 del train_loss
+
+                if detailed_logging:
+                    with torch.no_grad():
+                        # Print latent code
+                        latent = model.get_z(model_input)
+                        print("Latent:", latent)
 
                 if rank == 0:
                     pbar.update(1)
@@ -197,6 +206,9 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
 
                 total_steps += 1
                 if max_steps is not None and total_steps == max_steps:
+                    break
+
+                if detailed_logging:
                     break
 
             # Log train accuracy for this epoch

@@ -107,7 +107,7 @@ def multigpu_train(gpu, opt, cache):
                                  model_dir=root_path, loss_fn=loss_fn,
                                  iters_til_checkpoint=opt.iters_til_ckpt, summary_fn=summary_fn,
                                  overwrite=True, optimizers=optimizers,
-                                 rank=gpu, train_function=training.train, gpus=opt.gpus)
+                                 rank=gpu, train_function=training.train, gpus=opt.gpus, detailed_logging=True)
 
 
 if __name__ == "__main__":
