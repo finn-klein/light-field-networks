@@ -139,15 +139,15 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
                     else:
                         torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=clip_grad)
 
-                for optim in optimizers:
-                    optim.step()
-                del train_loss
-
                 if detailed_logging:
                     with torch.no_grad():
                         # Print latent code
                         latent = model.get_z(model_input)
                         print("Latent:", latent)
+
+                for optim in optimizers:
+                    optim.step()
+                del train_loss
 
                 if rank == 0:
                     pbar.update(1)
