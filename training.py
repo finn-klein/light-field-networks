@@ -84,8 +84,8 @@ def train(model, dataloaders, epochs, lr, epochs_til_checkpoint, model_dir, loss
             for step, (model_input, gt) in enumerate(train_dataloader):
                 if detailed_logging:
                     print("Epoch", epoch)
-                    print("Instance name:", (model_input[0]['query']['instance_name']))
-                    print("Pose:", model_input[0]['query']['cam2world'])
+                    print("Instance name:", (model_input['query']['instance_name']))
+                    print("Pose:", model_input['query']['cam2world'])
                 if device == 'gpu':
                     model_input = util.dict_to_gpu(model_input)
                     gt = util.dict_to_gpu(gt)
