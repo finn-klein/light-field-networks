@@ -67,9 +67,9 @@ def multigpu_train(gpu, opt, cache):
 
     def create_dataloader_callback(sidelength, batch_size, query_sparsity):
         train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
-                                                            root_dir=opt.data_root, query_sparsity=query_sparsity,
+                                                            root_dir=opt.data_root, query_sparsity=None,
                                                             img_sidelength=sidelength, vary_context_number=False,
-                                                            cache=cache, specific_observation_idcs=specific_observation_idcs,
+                                                            cache=None, specific_observation_idcs=specific_observation_idcs,
                                                             max_num_instances=opt.max_num_instances,
                                                             dataset_type='test',
                                                             viewlist=opt.viewlist,
@@ -107,8 +107,7 @@ def multigpu_train(gpu, opt, cache):
                                  model_dir=root_path, loss_fn=loss_fn,
                                  iters_til_checkpoint=opt.iters_til_ckpt, summary_fn=summary_fn,
                                  overwrite=True, optimizers=optimizers,
-                                 rank=gpu, train_function=training.train, gpus=opt.gpus, detailed_logging=True)
-
+                                 rank=gpu, train_function=training.train, gpus=opt.gpus, detailed_logging=False)
 
 if __name__ == "__main__":
     manager = Manager()
