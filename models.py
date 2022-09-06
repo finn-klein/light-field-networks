@@ -186,7 +186,7 @@ class LFAutoDecoder(LightFieldModel):
         z = self.latent_codes(instance_idcs)
         return z
 
-    def infer_and_classify(self, rgb, pose, intrinsics, uv, labels=None):
+    def infer_and_classify(self, rgb, pose, intrinsics, uv, labels=None, detailed_logging=False):
         b, n_ctxt = uv.shape[:2]
         n_qry, n_pix = uv.shape[1:3]
 
@@ -214,7 +214,10 @@ class LFAutoDecoder(LightFieldModel):
                 novel_views = novel_views.view(b, n_qry, n_pix, 3)
 
                 loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(latent_codes.weight**2) * 100 # reg_weight = 100
-
+                print("Epoch", iter)
+                if detailed_logging:
+                    with torch.no_grad():
+                        print("Latent:", latent_codes.weight)
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
