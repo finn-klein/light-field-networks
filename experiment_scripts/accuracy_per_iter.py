@@ -90,8 +90,8 @@ intrinsics = model_input['query']['intrinsics'].cuda()
 pose = model_input['query']['cam2world'].cuda()
 uv = model_input['query']['uv'].cuda().float()
 labels = model_input['query']['class'].squeeze().cuda() # (b)
-print("Instance name:", model_input['query']['instance_name'])
-print("Pose:", pose)
+# print("Instance name:", model_input['query']['instance_name'])
+# print("Pose:", pose)
 
 model.pose = pose
 model.intrinsics = intrinsics
@@ -100,4 +100,4 @@ model.num_iters = opt.num_inference_iters
 model.lr = opt.lr
 
 # inference with logging
-model.infer_and_classify(rgb, pose, intrinsics, uv, labels=labels, detailed_logging=True)
+model.infer_and_classify(rgb, pose, intrinsics, uv, labels=labels, detailed_logging=False)
