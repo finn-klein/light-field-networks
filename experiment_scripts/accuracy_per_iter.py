@@ -78,7 +78,9 @@ train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                     specific_classes=[class_id],
                                                     num_instances_per_class=num_instances_per_class,
                                                     test=True,
-                                                    test_context_idcs=[0])
+                                                    viewlist="./experiment_scripts/viewlists/src_dvr.txt"
+                                                    test_context_idcs=[0],
+                                                    viewlist=)
 dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
                         drop_last=True, num_workers=0)
 
