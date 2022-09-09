@@ -36,7 +36,22 @@ p.add_argument('--max_num_instances', type=int, default=-1)
 p.add_argument('--max_num_observations', type=int, default=50, required=False)
 p.add_argument('--num_instances_per_class', type=int, required=False)
 p.add_argument('--single_class_string', type=str, required=False)
+p.add_argument('--attack_name', type=str, required=True)
 opt = p.parse_args()
+
+print(f"----ATTACK TYPE: {opt.attack_name}----")
+
+attacks = {"l2gauss": fb.attacks.L2AdditiveGaussianNoiseAttack(),
+           "l2uniform": fb.attacks.L2AdditiveUniformNoiseAttack(),
+           "l2clippinggauss": fb.attacks.L2ClippingAwareAdditiveGaussianNoiseAttack(),
+           "l2clippinguniform": fb.attacks.L2ClippingAwareAdditiveUniformNoiseAttack(),
+           "linfuniform": fb.attacks.LinfAdditiveUniformNoiseAttack(),
+           "l2repeatedgauss": fb.attacks.L2RepeatedAdditiveAdditiveGaussianNoiseAttack(),
+           "l2repeateduniform": fb.attacks.L2RepeatedAdditiveUniformNoiseAttack(),
+           "l2clippingrepeatedgauss": fb.attacks.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack(),
+           "l2clippingrepeateduniform": fb.attacks.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack(),
+           "linfrepeateduniform": fb.attacks.LinfRepeatedAdditiveUniformNoiseAttack()
+           }
 
 lr = opt.lr
 num_iters = opt.num_inference_iters
@@ -102,7 +117,7 @@ for model_input, ground_truth in iter(dataloader):
     #attack = fb.attacks.GenAttack()
     print('labels', labels)
     print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %")
-    attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
+    attack = attack = attacks[opt.attack_name]
 
     epsilons = [
         0.0,
