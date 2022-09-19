@@ -214,7 +214,7 @@ class LFAutoDecoder(LightFieldModel):
                 novel_views = novel_views.view(b, n_qry, n_pix, 3)
 
                 loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(latent_codes.weight**2) * 100 # reg_weight = 100
-                print("Epoch", iter)
+                #print("Epoch", iter)
                 if detailed_logging:
                     with torch.no_grad():
                         print("Latent:", latent_codes.weight)
