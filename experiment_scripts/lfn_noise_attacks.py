@@ -76,7 +76,7 @@ else:
     selected_class_str = None
 
 all_classes = list(multiclass_dataio.string2class_dict.keys())
-print(all_classes)
+#print(all_classes)
 
 print("Initializing model")
 model = LFAutoDecoder(latent_dim=256, num_instances=opt.num_instances_per_class, classify=True).cuda()

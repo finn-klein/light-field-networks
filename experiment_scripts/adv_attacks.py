@@ -74,6 +74,7 @@ else:
     selected_class_str = None
 
 print("Loading dataset")
+class_id = multiclass_dataio.class2string_dict[int(opt.single_class_string)]
 train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
                                                     root_dir=opt.data_root, query_sparsity=None,
                                                     img_sidelength=opt.img_sidelength, vary_context_number=True,
@@ -82,7 +83,7 @@ train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
                                                     # max_num_observations_per_instance=opt.max_num_observations_train,
                                                     dataset_type=opt.set,
                                                     viewlist="/home/hpc/iwi9/iwi9015h/light-field-networks/experiment_scripts/viewlists/src_dvr.txt",
-                                                    specific_classes=selected_class_str,
+                                                    specific_classes=[class_id],
                                                     num_instances_per_class=num_instances_per_class)
 dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
                           drop_last=True, num_workers=0)
@@ -100,7 +101,7 @@ if opt.checkpoint_path is not None:
 fmodel = fb.PyTorchModel(model, bounds=(-1, 1))
 
 robust_accs = list()
-for model_input, ground_truth in iter(dataloader):
+for model_input, ground_truth in iter(dataloader): #will run infinitely
     #model_input, ground_truth = next(iter(dataloader)) # Dictionary
     inputs = model_input # (b, sidelength**2, 3)
     rgb = model_input['query']['rgb'].cuda()
@@ -146,23 +147,23 @@ for model_input, ground_truth in iter(dataloader):
         print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
     print()
 
-robust_acc_total = robust_accs.mean(axis=0)
+# robust_acc_total = robust_accs.mean(axis=0)
 
-print("#"*10 + "\n")
-print("Summary: \n")
-print("#"*10 + "\n")
-print("robust accuracy for perturbations with")
-for eps, acc in zip(epsilons, robust_acc_total):
-    print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
-print()
-print("we can also manually check this:")
-print()
-print("robust accuracy for perturbations with")
-for eps, advs_ in zip(epsilons, clipped_advs):
-    acc2 = fb.accuracy(fmodel, advs_, labels)
-    print(f"  Linf norm ≤ {eps:<6}: {acc2 * 100:4.1f} %")
-    print("    perturbation sizes:")
-    perturbation_sizes = (advs_ - images).norms.linf(axis=(1, 2, 3)).numpy()
-    print("    ", str(perturbation_sizes).replace("\n", "\n" + "    "))
-    if acc2 == 0:
-        break
+# print("#"*10 + "\n")
+# print("Summary: \n")
+# print("#"*10 + "\n")
+# print("robust accuracy for perturbations with")
+# for eps, acc in zip(epsilons, robust_acc_total):
+#     print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
+# print()
+# print("we can also manually check this:")
+# print()
+# print("robust accuracy for perturbations with")
+# for eps, advs_ in zip(epsilons, clipped_advs):
+#     acc2 = fb.accuracy(fmodel, advs_, labels)
+#     print(f"  Linf norm ≤ {eps:<6}: {acc2 * 100:4.1f} %")
+#     print("    perturbation sizes:")
+#     perturbation_sizes = (advs_ - images).norms.linf(axis=(1, 2, 3)).numpy()
+#     print("    ", str(perturbation_sizes).replace("\n", "\n" + "    "))
+#     if acc2 == 0:
+#         break

@@ -36,6 +36,7 @@ p.add_argument('--max_num_instances', type=int, default=-1)
 p.add_argument('--max_num_observations', type=int, default=50, required=False)
 p.add_argument('--num_instances_per_class', type=int, required=True)
 p.add_argument('--single_class_string', type=str, required=False)
+#p.add_argument('--attack_name', type=str, required=True)
 opt = p.parse_args()
 
 lr = opt.lr

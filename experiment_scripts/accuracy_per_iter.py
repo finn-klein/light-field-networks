@@ -40,6 +40,7 @@ p.add_argument('--single_class_index', type=str, required=False)
 opt = p.parse_args()
 
 lr = opt.lr
+print(lr)
 num_iters = opt.num_inference_iters
 
 if opt.specific_observation_idcs is not None:
@@ -77,7 +78,6 @@ train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                     dataset_type=opt.set,
                                                     specific_classes=[class_id],
                                                     num_instances_per_class=num_instances_per_class,
-                                                    test=True,
                                                     viewlist="./experiment_scripts/viewlists/src_dvr.txt",
                                                     test_context_idcs=[0])
 dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
