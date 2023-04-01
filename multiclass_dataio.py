@@ -2,6 +2,7 @@ import random
 import cv2
 import os
 import torch
+import torch.utils.data
 import numpy as np
 from glob import glob
 import data_util
