@@ -139,6 +139,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
         0.5,
         1.0,
     ]
+    epsilons = [x*256 for x in epsilons]
     # epsilons = [1.0]
     print('labels', labels.size())
     raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
