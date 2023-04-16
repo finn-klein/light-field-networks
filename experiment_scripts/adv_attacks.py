@@ -100,6 +100,9 @@ if opt.checkpoint_path is not None:
 
 fmodel = fb.PyTorchModel(model, bounds=(-1, 1))
 
+print("Running adversarial attacks")
+assert len(dataloader) != 0
+
 robust_accs = list()
 for model_input, ground_truth in iter(dataloader): #will run infinitely
     #model_input, ground_truth = next(iter(dataloader)) # Dictionary
