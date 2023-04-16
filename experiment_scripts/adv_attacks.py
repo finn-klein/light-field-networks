@@ -75,7 +75,7 @@ else:
 
 print("Loading dataset")
 #class_id = multiclass_dataio.class2string_dict[int(opt.single_class_string)]
-train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
+train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                     root_dir=opt.data_root, query_sparsity=None,
                                                     img_sidelength=opt.img_sidelength, vary_context_number=True,
                                                     specific_observation_idcs=specific_observation_idcs, cache=None,
@@ -83,7 +83,6 @@ train_dataset = multiclass_dataio.SceneClassDataset(num_context=0, num_trgt=1,
                                                     # max_num_observations_per_instance=opt.max_num_observations_train,
                                                     dataset_type=opt.set,
                                                     viewlist="/home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts/viewlists/src_dvr.txt",
-#                                                    specific_classes=[class_id],
                                                     num_instances_per_class=num_instances_per_class)
 dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
                           drop_last=True, num_workers=0)
@@ -122,7 +121,8 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     #attack = fb.attacks.GenAttack()
     print('labels', labels)
     print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %")
-    attack = attack = attacks[opt.attack_name]
+    attack = attacks[opt.attack_name]
+    print(attack)
 
     epsilons = [
         0.0,
