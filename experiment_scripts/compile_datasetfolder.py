@@ -2,9 +2,7 @@
 Compile the NMR ShapeNet dataset into a torchvision ImageFolder dataset.
 """
 
-import torch, torchvision
-import os
-import PIL
+from PIL import Image
 import configargparse
 import sys, os
 sys.path.append("/home/woody/iwi9/iwi9015h/light-field-networks")
