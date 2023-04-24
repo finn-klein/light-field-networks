@@ -182,7 +182,7 @@ class SceneClassDataset(torch.utils.data.Dataset):
         self.cache = cache
         self.test = test
         self.test_context_idcs = test_context_idcs
-        self.specific_classes = specific_classes
+        self.specific_classes = specific_classes # list of classes to select (not str)
         self.num_instances_per_class = num_instances_per_class
 
         if viewlist is not None:
