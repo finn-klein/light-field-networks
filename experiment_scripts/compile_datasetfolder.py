@@ -6,6 +6,7 @@ from PIL import Image
 import configargparse
 import sys, os
 sys.path.append("/home/woody/iwi9/iwi9015h/light-field-networks")
+import multiclass_dataio
 
 p = configargparse.ArgumentParser()
 p.add("-c", "--config_filepath", required=False, is_config_file=True)
