@@ -20,8 +20,8 @@ opt = p.parse_args()
 classes = list(multiclass_dataio.string2class_dict.keys())
 
 for c in classes:
-    if not os.path.exists(f"{out_path}/{c}"):
-        os.mkdir(f"{out_path}/{c}")
+    if not os.path.exists(f"{opt.out_path}/{c}"):
+        os.mkdir(f"{opt.out_path}/{c}")
     
     dataset = multiclass_dataio.SceneClassDataset(num_context=1,
                                         num_trgt=1,
@@ -35,4 +35,4 @@ for c in classes:
     
     for x in dataset.all_instances:
         img = Image.fromarray((x[opt.angle]['rgb'].numpy().reshape(64, 64, 3)*255).astype("uint8"), mode="RGB")
-        img.save(f"{out_path}/{c}/{x.instance_name}.png")
+        img.save(f"{opt.out_path}/{c}/{x.instance_name}.png")
