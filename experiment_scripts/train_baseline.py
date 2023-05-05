@@ -39,7 +39,7 @@ if opt.root_dir_val is not None:
     num_classes = len(dsets['val'].find_classes(opt.root_dir_val))
     dloaders['val'] = torch.utils.data.DataLoader(dsets['val'], batch_size=opt.batch_size, shuffle=True, num_workers=0)
 
-device = torch.device("cuda:0" if torch.cuda_is_available() else "cpu")
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 # create logging directories
 summaries_path = f"{opt.logging_root}/summaries"
