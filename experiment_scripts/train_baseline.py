@@ -31,7 +31,7 @@ dloaders = dict()
 
 # helper function to get numpy array from PIL image
 def to_np_array(data):
-    return [np.asarray(img) for img in data]
+    return [(np.asarray(sample), idx) for idx, sample in enumerate(data)]
 
 # Load datasets
 dsets['train'] = datasets.ImageFolder(opt.root_dir_train)
