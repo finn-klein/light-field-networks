@@ -35,9 +35,9 @@ num_classes = len(dataset.find_classes(opt.root_dir_train))
 dloaders['train'] = torch.utils.data.DataLoader(dsets['train'], batch_size=opt.batch_size, shuffle=True, num_workers=0)
 
 if opt.root_dir_val is not None:
-dsets['val'] = datasets.ImageFolder(opt.root_dir_val)
-num_classes = len(dataset.find_classes(opt.root_dir_val))
-dloaders['val'] = torch.utils.data.DataLoader(dsets['val'], batch_size=opt.batch_size, shuffle=True, num_workers=0)
+    dsets['val'] = datasets.ImageFolder(opt.root_dir_val)
+    num_classes = len(dataset.find_classes(opt.root_dir_val))
+    dloaders['val'] = torch.utils.data.DataLoader(dsets['val'], batch_size=opt.batch_size, shuffle=True, num_workers=0)
 
 device = torch.device("cuda:0" if torch.cuda_is_available() else "cpu")
 
