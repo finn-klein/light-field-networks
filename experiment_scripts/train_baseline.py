@@ -20,6 +20,7 @@ p.add_argument('--logging_root', type=str, default=config.logging_root)
 p.add_argument('--root_dir_train', type=str, required=True)
 p.add_argument('--root_dir_val', type=str, required=False)
 p.add_argument('--batch_size', type=int, default=64)
+p.add_argument('--num_epochs', type=int, default=10000)
 p.add_argument('--iters_til_ckpt', type=int, default=10000)
 p.add_argument('--epochs_til_ckpt', type=int, default=5)
 
@@ -133,3 +134,10 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs):
 
     model.load_state_dict(best_model_wts)
     return model, val_acc_history
+
+# initialize optimizer
+model = model.to(device)
+optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
+criterion = nn.CrossEntropyLoss()
+
+train_model(model, dloaders, optimizer, criterion, opt.num_epochs)
