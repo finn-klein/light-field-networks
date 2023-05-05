@@ -118,7 +118,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs):
 
             print('{} Loss: {:.4f} Acc: {:.4f}'.format(phase, epoch_loss, epoch_acc))
 
-            if phase = 'val' and epoch_acc > best_acc:
+            if phase == 'val' and epoch_acc > best_acc:
                 best_acc = epoch_acc
                 best_model_wts = copy.deepcopy(model.state_dict())
             if phase == 'val':
