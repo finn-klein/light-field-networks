@@ -16,7 +16,7 @@ from torch.utils.tensorboard import SummaryWriter
 p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True)
 
-p.add_argument('--logging_root', type=str, default=config.logging_root)
+p.add_argument('--logging_root', type=str, required=True)
 p.add_argument('--root_dir_train', type=str, required=True)
 p.add_argument('--root_dir_val', type=str, required=False)
 p.add_argument('--batch_size', type=int, default=64)
