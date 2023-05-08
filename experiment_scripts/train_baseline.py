@@ -32,7 +32,20 @@ dloaders = dict()
 # helper function to get numpy array from PIL image
 def collate(data):
     d = list(zip(*data))
-    return torch.tensor([np.asarray(img, dtype='float32')/255 for img in d[0]]), torch.tensor(np.asarray(d[1]))
+    imgs = d[0]
+    labels = d[1]
+    
+    # cast PIL.Image into np.array, normalize to [0; 1]
+    imgs = [np.asarray(img, dtype="float32") / 255 for img in imgs]
+    # convert list of imgs to np.array before wrapping in tensor (performance reasons)
+    imgs = np.array(imgs)
+    imgs = torch.tensor(imgs)
+    # permute dimensions as expected by ResNet
+    imgs = torch.permute(imgs, (0, 3, 1, 2)) # channels, rgb, x, y
+    
+    labels = torch.tensor(labels)
+    
+    return imgs, labels
 
 # Load datasets
 dsets['train'] = datasets.ImageFolder(opt.root_dir_train)
