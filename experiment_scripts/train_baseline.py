@@ -49,13 +49,13 @@ def collate(data):
 
 # Load datasets
 dsets['train'] = datasets.ImageFolder(opt.root_dir_train)
-num_classes = len(dsets['train'].find_classes(opt.root_dir_train))
+num_classes = len(dsets['train'].find_classes(opt.root_dir_train)[0])
 print(f"num_classes: {num_classes}")
 dloaders['train'] = torch.utils.data.DataLoader(dsets['train'], batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 
 if opt.root_dir_val is not None:
     dsets['val'] = datasets.ImageFolder(opt.root_dir_val)
-    num_classes = len(dsets['val'].find_classes(opt.root_dir_val))
+    num_classes = len(dsets['val'].find_classes(opt.root_dir_val)[0])
     dloaders['val'] = torch.utils.data.DataLoader(dsets['val'], batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
