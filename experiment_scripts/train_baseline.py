@@ -160,4 +160,4 @@ model = model.to(device)
 optimizer = optim.SGD(model.parameters(), lr=0.001, momentum=0.9)
 criterion = nn.CrossEntropyLoss()
 
-train_model(model, dloaders, optimizer, criterion, opt.num_epochs)
+train_model(model, dloaders, criterion, optimizer, opt.num_epochs)
