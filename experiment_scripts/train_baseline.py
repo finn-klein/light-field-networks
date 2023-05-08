@@ -31,9 +31,8 @@ dloaders = dict()
 
 # helper function to get numpy array from PIL image
 def collate(data):
-    d = [(np.asarray(sample), idx) for sample, idx in data]
-    d = list(zip(*d))
-    return list(d[0]), list(d[1])
+    d = list(zip(*data))
+    return torch.tensor([np.asarray(img, dtype='float32')/255 for img in d[0]]), torch.tensor(np.asarray(d[1]))
 
 # Load datasets
 dsets['train'] = datasets.ImageFolder(opt.root_dir_train)
