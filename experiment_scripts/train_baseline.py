@@ -33,7 +33,7 @@ dloaders = dict()
 def collate(data):
     d = [(np.asarray(sample), idx) for sample, idx in data]
     d = list(zip(*d))
-    return d[0], d[1]
+    return list(d[0]), list(d[1])
 
 # Load datasets
 dsets['train'] = datasets.ImageFolder(opt.root_dir_train)
