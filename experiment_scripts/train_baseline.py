@@ -74,7 +74,8 @@ writer = SummaryWriter(summaries_path, flush_secs=10)
 # Load model
 model = models.resnet50(pretrained=True)
 # Replace last layer
-model.fc = nn.Linear(512, num_classes)
+in_feat = model.fc.in_features
+model.fc = nn.Linear(in_feat, num_classes)
 
 def train_model(model, dataloaders, criterion, optimizer, num_epochs):
     since = time.time()
