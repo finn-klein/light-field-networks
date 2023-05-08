@@ -30,18 +30,20 @@ dsets = dict()
 dloaders = dict()
 
 # helper function to get numpy array from PIL image
-def to_np_array(data):
-    return [(np.asarray(sample), idx) for sample, idx in data]
+def collate(data):
+    d = [(np.asarray(sample), idx) for sample, idx in data]
+    d = list(zip(*d))
+    return *d
 
 # Load datasets
 dsets['train'] = datasets.ImageFolder(opt.root_dir_train)
 num_classes = len(dsets['train'].find_classes(opt.root_dir_train))
-dloaders['train'] = torch.utils.data.DataLoader(dsets['train'], batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=to_np_array)
+dloaders['train'] = torch.utils.data.DataLoader(dsets['train'], batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 
 if opt.root_dir_val is not None:
     dsets['val'] = datasets.ImageFolder(opt.root_dir_val)
     num_classes = len(dsets['val'].find_classes(opt.root_dir_val))
-    dloaders['val'] = torch.utils.data.DataLoader(dsets['val'], batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=to_np_array)
+    dloaders['val'] = torch.utils.data.DataLoader(dsets['val'], batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
