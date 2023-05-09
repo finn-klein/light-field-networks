@@ -22,7 +22,8 @@ p.add_argument('--root_dir_val', type=str, required=False)
 p.add_argument('--batch_size', type=int, default=64)
 p.add_argument('--num_epochs', type=int, default=10000)
 p.add_argument('--iters_til_ckpt', type=int, default=10000)
-p.add_argument('--epochs_til_ckpt', type=int, default=5)
+p.add_argument('--epochs_til_ckpt', type=int, default=3)
+p.add_argument('--training_steps', type=int, default=20000)
 
 opt = p.parse_args()
 
