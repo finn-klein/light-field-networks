@@ -147,6 +147,9 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs):
         
         if epoch != 0 and epoch % opt.epochs_til_ckpt == 0:
             torch.save(model.state_dict(), f"{checkpoints_path}/model_epoch_{epoch}_iter_{total_steps}.pth")
+
+        if total_steps >= opt.training_steps:
+            break
         print()
     
     time_elapsed = time.time() - since
@@ -154,6 +157,7 @@ def train_model(model, dataloaders, criterion, optimizer, num_epochs):
     print('Best val acc: {:4f}'.format(best_acc))
 
     model.load_state_dict(best_model_wts)
+    torch.save(model.state_dict(), f"{checkpoints_path}/best.pth")
     return model, val_acc_history
 
 # initialize optimizer
