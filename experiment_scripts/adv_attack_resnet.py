@@ -67,6 +67,8 @@ fmodel = fb.PyTorchModel(model, bounds=(0, 1))
 
 robust_accs = list()
 for imgs, labels in dataloader:
+    imgs = imgs.to(device)
+    labels = labels.to(device)
     print(f"clean accuracy:  {fb.accuracy(fmodel, imgs, labels) * 100:.1f} %")
     attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
 
