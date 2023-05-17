@@ -51,7 +51,10 @@ dataset = datasets.ImageFolder(opt.data_root)
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 num_classes = len(dataset.find_classes(opt.data_root)[0])
 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
 model = models.resnet50().eval()
+model = model.to(device)
 in_feat = model.fc.in_features
 # modify last layer
 model.fc = torch.nn.Linear(in_feat, num_classes)
