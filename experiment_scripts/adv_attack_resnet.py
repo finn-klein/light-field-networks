@@ -47,7 +47,8 @@ def collate(data):
 
 
 model = models.resnet50().eval()
-model.load_state_dict(opt.checkpoint_path)
+state_dict = torch.load(opt.checkpoint_path)
+model.load_state_dict(state_dict)
 # preprocessing??
 fmodel = fb.PyTorchModel(model, bounds=(0, 1))
 
