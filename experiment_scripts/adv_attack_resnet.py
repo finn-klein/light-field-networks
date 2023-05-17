@@ -49,7 +49,7 @@ def collate(data):
 # Initialize dataset
 dataset = datasets.ImageFolder(opt.data_root)
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
-num_classes = len(dsets['train'].find_classes(opt.root_dir_train)[0])
+num_classes = len(dataset.find_classes(opt.root_dir_train)[0])
 
 model = models.resnet50().eval()
 in_feat = model.fc.in_features
