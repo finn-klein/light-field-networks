@@ -46,15 +46,21 @@ def collate(data):
     return imgs, labels
 
 
+# Initialize dataset
+dataset = datasets.ImageFolder(opt.data_root)
+dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
+num_classes = len(dsets['train'].find_classes(opt.root_dir_train)[0])
+
 model = models.resnet50().eval()
+in_feat = model.fc.in_features
+# modify last layer
+model.fc = torch.nn.Linear(in_feat, num_classes)
+
 state_dict = torch.load(opt.checkpoint_path)
 model.load_state_dict(state_dict)
 # preprocessing??
 fmodel = fb.PyTorchModel(model, bounds=(0, 1))
 
-# Initialize dataset
-dataset = datasets.ImageFolder(opt.data_root)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 
 robust_accs = list()
 for imgs, labels in dataloader:
