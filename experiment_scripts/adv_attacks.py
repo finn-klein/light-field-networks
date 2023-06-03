@@ -37,7 +37,11 @@ p.add_argument('--max_num_observations', type=int, default=50, required=False)
 p.add_argument('--num_instances_per_class', type=int, required=False)
 p.add_argument('--single_class_string', type=str, required=False)
 p.add_argument('--attack_name', type=str, required=True)
+p.add_argument('--out_file', type=str, required=False)
+p.add_argument('--eps', type=float, required=False)
 opt = p.parse_args()
+
+out_file = open(opt.out_file, "w")
 
 print(f"----ATTACK TYPE: {opt.attack_name}----")
 
@@ -124,50 +128,36 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     attack = attacks[opt.attack_name]
     print(attack)
 
-    epsilons = [
-        0.0,
-        0.0002,
-        0.0005,
-        0.0008,
-        0.001,
-        0.0015,
-        0.002,
-        0.003,
-        0.01,
-        0.1,
-        0.3,
-        0.5,
-        1.0,
-    ]
+    if opt.eps is not None:
+        epsilons = [opt.eps]
+    else:
+        epsilons = [
+            0.0,
+            0.0002,
+            0.0005,
+            0.0008,
+            0.001,
+            0.0015,
+            0.002,
+            0.003,
+            0.01,
+            0.1,
+            0.3,
+            0.5,
+            1.0,
+        ]
     epsilons = [x*256 for x in epsilons]
     # epsilons = [1.0]
-    print('labels', labels.size())
+    #print('labels', labels.size())
     raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
     robust_accuracy = 1 - success.float().mean(axis=-1)
     robust_accs.append(robust_accuracy)
 
-    print("robust accuracy for perturbations with")
-    for eps, acc in zip(epsilons, robust_accuracy):
-        print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
-    print()
+    if opt.out_file is not None:
+        out_file.write
 
-# robust_acc_total = robust_accs.mean(axis=0)
-
-# print("#"*10 + "\n")
-# print("Summary: \n")
-# print("#"*10 + "\n")
-# print("robust accuracy for perturbations with")
-# for eps, acc in zip(epsilons, robust_acc_total):
-#     print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
-# print()
-# print("we can also manually check this:")
-# print()
-# print("robust accuracy for perturbations with")
-# for eps, advs_ in zip(epsilons, clipped_advs):
-#     acc2 = fb.accuracy(fmodel, advs_, labels)
-#     print(f"  Linf norm ≤ {eps:<6}: {acc2 * 100:4.1f} %")
-#     print("    perturbation sizes:")
-#     perturbation_sizes = (advs_ - images).norms.linf(axis=(1, 2, 3)).numpy()
-#     print("    ", str(perturbation_sizes).replace("\n", "\n" + "    "))
-#     if acc2 == 0:
-#         break
+    else:
+        print("robust accuracy for perturbations with")
+        for eps, acc in zip(epsilons, robust_accuracy):
+            print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
+        print()
