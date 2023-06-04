@@ -22,26 +22,27 @@ import util
 p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True)
 
+p.add_argument('--attack_name', type=str, required=True)
+p.add_argument('--data_root', required=True)
+p.add_argument('--single_class_string', type=str, required=False)
+p.add_argument('--checkpoint_path', type=str)
+
 p.add_argument('--lr', type=float, default=1e-3)
 p.add_argument('--img_sidelength', type=int, default=64, required=False)
 p.add_argument('--batch_size', type=int, default=256)
 p.add_argument('--num_inference_iters', type=int, default=150)
-p.add_argument('--data_root', required=True)
-               # default='/om2/user/egger/MultiClassSRN/data/NMR_SmallDatasetForIOTesting')
 p.add_argument('--set', default='test')
-p.add_argument('--checkpoint_path', type=str,
-               default='/om2/user/sitzmann/logs/light_fields/adv_test/64_128_None/checkpoints/model_current.pth')
+
 p.add_argument('--specific_observation_idcs', type=str, default=None)
-p.add_argument('--max_num_instances', type=int, default=-1)
+p.add_argument('--max_num_instances', type=int, default=256)
 p.add_argument('--max_num_observations', type=int, default=50, required=False)
 p.add_argument('--num_instances_per_class', type=int, required=False)
-p.add_argument('--single_class_string', type=str, required=False)
-p.add_argument('--attack_name', type=str, required=True)
 p.add_argument('--out_file', type=str, required=False)
 p.add_argument('--eps', type=float, required=False)
 opt = p.parse_args()
 
-out_file = open(opt.out_file, "w")
+if opt.out_file is not None:
+    out_file = open(opt.out_file, "w")
 
 print(f"----ATTACK TYPE: {opt.attack_name}----")
 
@@ -124,7 +125,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
 
     #attack = fb.attacks.GenAttack()
     print('labels', labels)
-    print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %")
+    print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %") 
     attack = attacks[opt.attack_name]
     print(attack)
 
@@ -147,14 +148,13 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
             1.0,
         ]
     epsilons = [x*256 for x in epsilons]
-    # epsilons = [1.0]
-    #print('labels', labels.size())
     raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
     robust_accuracy = 1 - success.float().mean(axis=-1)
     robust_accs.append(robust_accuracy)
 
     if opt.out_file is not None:
-        out_file.write
+        for (eps, acc) in zip(epsilons, robust_accuracy)
+            out_file.write(f"{eps:<6} {robust_accuracy.item() * 100:4.1f}\n")
 
     else:
         print("robust accuracy for perturbations with")

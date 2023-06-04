@@ -24,8 +24,26 @@ p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True)
 p.add("--checkpoint_path", required=True)
 p.add("--data_root", required=True)
-p.add("--batch_size", default=64)
+p.add("--batch_size", default=256)
+p.add("--attack_name", required=True)
+p.add("--out_file", type=str, required=False)
+p.add("--single_class_string", type=str, required=True)
 opt = p.parse_args()
+
+if opt.out_file is not None:
+    out_file = open(opt.out_file, "w")
+
+attacks = {"l2gauss": fb.attacks.L2AdditiveGaussianNoiseAttack(),
+           "l2uniform": fb.attacks.L2AdditiveUniformNoiseAttack(),
+           "l2clippinggauss": fb.attacks.L2ClippingAwareAdditiveGaussianNoiseAttack(),
+           "l2clippinguniform": fb.attacks.L2ClippingAwareAdditiveUniformNoiseAttack(),
+           "linfuniform": fb.attacks.LinfAdditiveUniformNoiseAttack(),
+           "l2repeatedgauss": fb.attacks.L2RepeatedAdditiveGaussianNoiseAttack(),
+           "l2repeateduniform": fb.attacks.L2RepeatedAdditiveUniformNoiseAttack(),
+           "l2clippingrepeatedgauss": fb.attacks.L2ClippingAwareRepeatedAdditiveGaussianNoiseAttack(),
+           "l2clippingrepeateduniform": fb.attacks.L2ClippingAwareRepeatedAdditiveUniformNoiseAttack(),
+           "linfrepeateduniform": fb.attacks.LinfRepeatedAdditiveUniformNoiseAttack()
+           }
 
 # helper function to get numpy array from PIL image
 def collate(data):
@@ -69,7 +87,6 @@ robust_accs = list()
 for imgs, labels in dataloader:
     imgs = imgs.to(device)
     labels = labels.to(device)
-    print(f"clean accuracy:  {fb.accuracy(fmodel, imgs, labels) * 100:.1f} %")
     attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
 
     epsilons = [
@@ -93,6 +110,10 @@ for imgs, labels in dataloader:
     raw_advs, clipped_advs, success = attack(fmodel, inputs=imgs, criterion=labels, epsilons=epsilons)
     robust_accuracy = 1 - success.float().mean(axis=-1)
     robust_accs.append(robust_accuracy)
+
+    if opt.out_file is not None:
+        for (eps, acc) in zip(epsilons, robust_accuracy)
+            out_file.write(f"{eps:<6} {robust_accuracy.item() * 100:4.1f}\n")
 
     print("robust accuracy for perturbations with")
     for eps, acc in zip(epsilons, robust_accuracy):

@@ -12,9 +12,13 @@
 # (Model paths, data root hard-coded for now)
 
 attacks=("l2gauss" "l2uniform" "l2clippinggauss" "l2clippinguniform" "linfuniform" "l2repeatedgauss" "l2repeateduniform" "l2clippingrepeatedgauss" "l2clippingrepeateduniform" "linfrepeateduniform")
+script_path="/home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts"
+lfn_root_path="/home/woody/iwi9/iwi9015h/nmr/NMR_Dataset"
+lfn_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train00/nmr/64_128_None/checkpoints/model_epoch_0006_iter_040000.pth"
+ff_root_path="/home/woody/iwi9/iwi9015h/nmr_ff_test"
+ff_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train_baseline00/checkpoints/best.pth"
 
-
-
+echo "TODO: add single class string support to adv_attack_resnet.py"
 exit 1
 
 
@@ -24,19 +28,44 @@ if [ -d "$1" ]; then
     exit 1
 fi
 mkdir $1
+cd $1
 
 # --- LFN ---
-cd $1
 mkdir LFN
 cd LFN
+echo "LFN"
 
 for class in {0..12}; do
-    mkdir $class
-    cd $class
-    for attack in "${attacks[@]}"
-    do
-      mkdir $attack
-      echo "$attack"
-      
-    done
+  mkdir $class
+  cd $class
+  for attack in "${attacks[@]}"
+  do
+    mkdir $attack
+    cd $attack
+    echo "$attack"
+    python $script_path/adv_attacks.py --data_root $lfn_root_path --attack_name $attack --single_class_string $class --out_file lfn_${attack}_${class}.txt --checkpoint_path $lfn_ckpt_path
+    cd ..
+  done
+  cd ..
 done
+cd ..
+
+# --- FF ---
+mkdir FF
+cd FF
+echo "FF"
+
+for class in {0..12}; do
+  mkdir $class
+  cd $class
+  for attack in "${attacks[@]}"
+  do
+    mkdir $attack
+    cd $attack
+    echo "$attack"
+    python $script_path/adv_attack_resnet.py --data_root $ff_root_path --attack_name $attack --single_class_string $class --out_file ff_${attack}_${class}.txt --checkpoint_path $ff_ckpt_path
+    cd ..
+  done
+  cd ..
+done
+
