@@ -1,4 +1,9 @@
-#!/bin/bash
+#!/bin/bash -l
+
+#SBATCH --job-name=lfn_2_l2gauss
+#SBATCH --time=01:00:00
+#SBATCH --gres=gpu:a100:1 --partition=a100
+#SBATCH --export=NONE
 
 out_path="/mnt/work/iwi9/iwi9015h/experiments/batchtest"
 script_path="/home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts"
