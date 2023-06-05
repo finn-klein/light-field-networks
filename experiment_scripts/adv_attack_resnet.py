@@ -66,7 +66,12 @@ def collate(data):
 
 # Initialize dataset
 dataset = datasets.ImageFolder(opt.data_root)
-dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
+
+if opt.single_class_string is not None:
+    single_class_dataset = [(item, label) for (item, label) in dataset if label==opt.single_class_string]
+    single_class_dataloader = torch.utils.data.DataLoader(single_class_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
+else:
+    dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 num_classes = len(dataset.find_classes(opt.data_root)[0])
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -87,7 +92,7 @@ robust_accs = list()
 for imgs, labels in dataloader:
     imgs = imgs.to(device)
     labels = labels.to(device)
-    attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
+    attack = attacks[opt.attack_name]
 
     epsilons = [
         0.0,
@@ -112,10 +117,10 @@ for imgs, labels in dataloader:
     robust_accs.append(robust_accuracy)
 
     if opt.out_file is not None:
-        for (eps, acc) in zip(epsilons, robust_accuracy)
+        for (eps, acc) in zip(epsilons, robust_accuracy):
             out_file.write(f"{eps:<6} {robust_accuracy.item() * 100:4.1f}\n")
-
-    print("robust accuracy for perturbations with")
-    for eps, acc in zip(epsilons, robust_accuracy):
-        print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
-    print()
+    else:
+        print("robust accuracy for perturbations with")
+        for eps, acc in zip(epsilons, robust_accuracy):
+            print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
+        print()
