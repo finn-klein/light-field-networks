@@ -17,6 +17,6 @@ lfn_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train00/nmr/64_128_None/che
 ff_root_path="/home/woody/iwi9/iwi9015h/nmr_ff_test"
 ff_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train_baseline00/checkpoints/best.pth"
 
-cd /home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts
-python adv_attacks.py --data_root $lfn_root_path --checkpoint_path $lfn_ckpt_path --attack_name l2gauss \
+cd /home/woody/iwi9/iwi9015h/light-field-networks/
+python experiment_scripts/adv_attacks.py --data_root $lfn_root_path --checkpoint_path $lfn_ckpt_path --attack_name l2gauss \
  --single_class_string 2 --out_file ${out_path}/lfn_2_l2gauss.txt
