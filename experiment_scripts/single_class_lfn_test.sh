@@ -5,6 +5,11 @@
 #SBATCH --gres=gpu:a100:1 --partition=a100
 #SBATCH --export=NONE
 
+module load python
+module load git
+
+conda activate lf
+
 out_path="/mnt/work/iwi9/iwi9015h/experiments/batchtest"
 script_path="/home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts"
 lfn_root_path="/home/woody/iwi9/iwi9015h/nmr/NMR_Dataset"
