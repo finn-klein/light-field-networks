@@ -153,11 +153,11 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     robust_accs.append(robust_accuracy)
 
     if opt.out_file is not None:
-        for (eps, acc) in zip(epsilons, robust_accuracy):
-            out_file.write(f"{eps:<6} {robust_accuracy.item() * 100:4.1f}\n")
+        for (eps, acc) in zip(epsilons, robust_accs):
+            out_file.write(f"{eps:<6} {acc * 100:4.1f}\n")
 
     else:
         print("robust accuracy for perturbations with")
-        for eps, acc in zip(epsilons, robust_accuracy):
-            print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
+        for (eps, acc) in zip(epsilons, robust_accuracy):
+            print(f"  Linf norm ≤ {eps:<6}: {acc * 100:4.1f} %")
         print()
