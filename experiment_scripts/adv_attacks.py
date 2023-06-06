@@ -35,7 +35,7 @@ p.add_argument('--set', default='test')
 
 p.add_argument('--specific_observation_idcs', type=str, default=None)
 p.add_argument('--max_num_instances', type=int, default=256)
-p.add_argument('--max_num_observations', type=int, default=50, required=False)
+p.add_argument('--max_num_observations', type=int, default=256, required=False)
 p.add_argument('--num_instances_per_class', type=int, required=False)
 p.add_argument('--out_file', type=str, required=False)
 p.add_argument('--eps', type=float, required=False)
@@ -153,7 +153,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     robust_accs.append(robust_accuracy)
 
     if opt.out_file is not None:
-        for (eps, acc) in zip(epsilons, robust_accs):
+        for (eps, acc) in zip(epsilons, robust_accuracy):
             out_file.write(f"{eps:<6} {acc.item() * 100:4.1f}\n")
 
     else:
