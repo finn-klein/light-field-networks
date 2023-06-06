@@ -19,4 +19,4 @@ ff_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train_baseline00/checkpoints
 
 cd /home/woody/iwi9/iwi9015h/light-field-networks/
 python experiment_scripts/adv_attacks.py --data_root $lfn_root_path --checkpoint_path $lfn_ckpt_path --attack_name l2gauss \
- --single_class_string 2 --out_file ${out_path}/lfn_2_l2gauss.txt
+ --single_class_string 2 --out_file ${out_path}/lfn_2_l2gauss.txt --specific_observation_idcs 22

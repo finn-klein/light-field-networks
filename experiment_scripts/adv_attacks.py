@@ -33,7 +33,7 @@ p.add_argument('--batch_size', type=int, default=256)
 p.add_argument('--num_inference_iters', type=int, default=150)
 p.add_argument('--set', default='test')
 
-p.add_argument('--specific_observation_idcs', type=str, default=None)
+p.add_argument('--specific_observation_idcs', type=str, default="22")
 p.add_argument('--max_num_instances', type=int, default=256)
 p.add_argument('--max_num_observations', type=int, default=256, required=False)
 p.add_argument('--num_instances_per_class', type=int, required=False)
