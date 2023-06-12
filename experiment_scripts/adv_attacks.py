@@ -92,7 +92,7 @@ train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                     dataset_type=opt.set,
                                                     viewlist="/home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts/viewlists/src_dvr.txt",
                                                     num_instances_per_class=num_instances_per_class,
-                                                    specific_classes=class_id)
+                                                    specific_classes=[class_id])
 dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
                           drop_last=True, num_workers=0)
 
