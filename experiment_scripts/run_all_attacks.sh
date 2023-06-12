@@ -28,9 +28,7 @@ lfn_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train00/nmr/64_128_None/che
 ff_root_path="/home/woody/iwi9/iwi9015h/nmr_ff_test"
 ff_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train_baseline00/checkpoints/best.pth"
 
-echo "TODO: add single class string support to adv_attack_resnet.py"
-exit 1
-
+echo "experiment folder: $1"
 
 # Create file structure
 if [ -d "$1" ]; then
@@ -79,3 +77,4 @@ for class in {0..12}; do
   cd ..
 done
 
+exit 1
