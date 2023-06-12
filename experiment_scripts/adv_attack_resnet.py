@@ -28,6 +28,7 @@ p.add("--batch_size", default=256)
 p.add("--attack_name", required=True)
 p.add("--out_file", type=str, required=False)
 p.add("--single_class_string", type=str, required=True)
+p.add('--max_num_instances', type=int, default=256)
 opt = p.parse_args()
 
 if opt.out_file is not None:
@@ -67,10 +68,19 @@ def collate(data):
 # Initialize dataset
 dataset = datasets.ImageFolder(opt.data_root)
 
+
 if opt.single_class_string is not None:
     single_class_dataset = [(item, label) for (item, label) in dataset if label==int(opt.single_class_string)]
+    if opt.max_num_instances > len(single_class_dataset):
+        print(f"only {len(single_class_dataset)} are available.")
+    else:
+        single_class_dataset = single_class_dataset[:opt.max_num_instances]
     dataloader = torch.utils.data.DataLoader(single_class_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 else:
+    if opt.max_num_instances > len(dataset):
+        print(f"only {len(dataset)} instances are available.")
+    else:
+        dataset = dataset[:opt.max_num_instances]
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 num_classes = len(dataset.find_classes(opt.data_root)[0])
 
