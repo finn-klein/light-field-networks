@@ -68,7 +68,7 @@ def collate(data):
 dataset = datasets.ImageFolder(opt.data_root)
 
 if opt.single_class_string is not None:
-    single_class_dataset = [(item, label) for (item, label) in dataset if label==opt.single_class_string]
+    single_class_dataset = [(item, label) for (item, label) in dataset if label==int(opt.single_class_string)]
     single_class_dataloader = torch.utils.data.DataLoader(single_class_dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
 else:
     dataloader = torch.utils.data.DataLoader(dataset, batch_size=opt.batch_size, shuffle=True, num_workers=0, collate_fn=collate)
