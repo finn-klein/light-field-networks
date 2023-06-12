@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -l
 
 # Runs adversarial robustness attacks on LFN and FF-baseline.
 # Saves results in folder hierarchy as follows:
