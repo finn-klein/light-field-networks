@@ -79,7 +79,10 @@ else:
     selected_class_str = None
 
 print("Loading dataset")
-#class_id = multiclass_dataio.class2string_dict[int(opt.single_class_string)]
+if selected_class_str is not None:
+    class_id = multiclass_dataio.class2string_dict[int(opt.single_class_string)]
+else:
+    class_id = None
 train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                     root_dir=opt.data_root, query_sparsity=None,
                                                     img_sidelength=opt.img_sidelength, vary_context_number=True,
@@ -88,7 +91,8 @@ train_dataset = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
                                                     # max_num_observations_per_instance=opt.max_num_observations_train,
                                                     dataset_type=opt.set,
                                                     viewlist="/home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts/viewlists/src_dvr.txt",
-                                                    num_instances_per_class=num_instances_per_class)
+                                                    num_instances_per_class=num_instances_per_class,
+                                                    specific_classes=class_id)
 dataloader = DataLoader(train_dataset, batch_size=opt.batch_size, shuffle=False,
                           drop_last=True, num_workers=0)
 
