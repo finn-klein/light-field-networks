@@ -3,8 +3,8 @@ import sys
 import os
 sys.path.append( os.path.dirname( os.path.dirname( os.path.abspath(__file__) ) ) )
 
-sys.path.append("../foolbox")
-sys.path.append("../eagerpy")
+sys.path.append("/home/woody/iwi9/iwi9015h/foolbox")
+sys.path.append("/home/woody/iwi9/iwi9015h/eagerpy")
 import foolbox as fb
 import configargparse
 import os, time, datetime
