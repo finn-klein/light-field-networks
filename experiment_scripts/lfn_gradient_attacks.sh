@@ -11,13 +11,13 @@ module load cuda/11.3.1
 module load git
 source activate lf
 
-for y in {0..12}; do
+#for y in {0..12}; do
 python experiment_scripts/lfn_gradient_attack.py --data_root /home/woody/iwi9/iwi9015h/nmr/NMR_Dataset \
 --checkpoint_path /home/vault/iwi9/iwi9015h/light_fields/rec_from_scratch/64_64_None/checkpoints/model_current.pth \
 --num_inference_iters 1000 \
 --num_instances_per_class 256 \
 --batch_size 256 \
 --lr 1e-4 \
---attack_name $x \
---single_class_string $y
-done
+--attack_name doesntmatter \
+--single_class_string 0
+#done
