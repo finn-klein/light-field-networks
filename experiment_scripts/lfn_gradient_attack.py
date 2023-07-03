@@ -119,7 +119,8 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     attack = fb.attacks.GradientAttack(model=fmodel, criterion=labels)
     print(attack)
 
-    attack()
+    out = attack(inputs, labels)
+    print(out)
 
     # robust_accuracy = 1 - success.float().mean(axis=-1)
     # robust_accs.append(robust_accuracy)
