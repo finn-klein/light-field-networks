@@ -19,5 +19,5 @@ python experiment_scripts/lfn_gradient_attack.py --data_root /home/woody/iwi9/iw
 --batch_size 256 \
 --lr 1e-4 \
 --attack_name $x \
---single_class_string $y > gradient_attacks/class-$y.txt
+--single_class_string $y
 done
