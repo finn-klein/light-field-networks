@@ -105,7 +105,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     intrinsics = model_input['query']['intrinsics'].cuda()
     pose = model_input['query']['cam2world'].cuda()
     uv = model_input['query']['uv'].cuda().float()
-    labels = model_input['query']['class'].squeeze().int().cuda() # (b)
+    labels = model_input['query']['class'].squeeze().cuda() # (b)
 
     model.pose = pose
     model.intrinsics = intrinsics
@@ -116,7 +116,8 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     #attack = fb.attacks.GenAttack()
     #print('labels', labels)
     #print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %") 
-    attack = fb.attacks.L2FastGradientAttack()
+    #attack = fb.attacks.L2FastGradientAttack()
+    attack = fb.attacks.L2AdditiveGaussianNoiseAttack()
     print(attack)
 
     epsilons = np.arange(20)/20*256
