@@ -119,7 +119,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     attack = fb.attacks.L2FastGradientAttack()
     print(attack)
 
-    out = attack(inputs, labels, criterion=labels, model=fmodel)
+    out = attack(inputs, labels, criterion=labels)
     print(out)
 
     # robust_accuracy = 1 - success.float().mean(axis=-1)
