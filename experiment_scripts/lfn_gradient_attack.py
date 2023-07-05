@@ -107,7 +107,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     pose = model_input['query']['cam2world'].cuda()
     uv = model_input['query']['uv'].cuda().float()
     labels = model_input['query']['class'].squeeze()
-    labels = labels.to(torch.float).cuda() # (b)
+    labels = labels.to(torch.int64).cuda() # (b)
 
     model.pose = pose
     model.intrinsics = intrinsics
