@@ -121,7 +121,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
 
     epsilons = np.arange(20)/20
 
-    out = attack(model=fmodel, inputs=inputs, criterion=fb.criteria.Misclassification(labels), epsilons=epsilons)
+    out = attack(model=fmodel, inputs=rgb, criterion=fb.criteria.Misclassification(labels), epsilons=epsilons)
     print(out)
 
     # robust_accuracy = 1 - success.float().mean(axis=-1)
