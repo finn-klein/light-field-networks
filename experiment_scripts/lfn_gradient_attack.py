@@ -119,21 +119,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     attack = fb.attacks.L2FastGradientAttack(labels)
     print(attack)
 
-    epsilons = [
-        0.0,
-        0.0002,
-        0.0005,
-        0.0008,
-        0.001,
-        0.0015,
-        0.002,
-        0.003,
-        0.01,
-        0.1,
-        0.3,
-        0.5,
-        1.0,
-    ]
+    epsilons = np.arange(20)/20
 
     out = attack(model=fmodel, inputs=inputs, criterion=fb.criteria.Misclassification(labels), epsilons=epsilons)
     print(out)
