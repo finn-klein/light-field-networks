@@ -116,7 +116,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     #attack = fb.attacks.GenAttack()
     #print('labels', labels)
     #print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %") 
-    attack = fb.attacks.L2FastGradientAttack(model=fmodel, criterion=fb.criteria.Misclassification())
+    attack = fb.attacks.L2FastGradientAttack(model=fmodel, labels=labels, criterion=fb.criteria.Misclassification())
     print(attack)
 
     epsilons = [
@@ -135,7 +135,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
         1.0,
     ]
 
-    out = attack(inputs, labels, epsilons=epsilons)
+    out = attack(inputs, epsilons=epsilons)
     print(out)
 
     # robust_accuracy = 1 - success.float().mean(axis=-1)
