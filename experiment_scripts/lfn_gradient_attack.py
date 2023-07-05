@@ -135,7 +135,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
         1.0,
     ]
 
-    out = attack.run(model=fmodel, inputs=inputs, criterion=fb.criteria.Misclassification(), epsilons=epsilons)
+    out = attack.run(model=fmodel, inputs=inputs, labels=labels, criterion=fb.criteria.Misclassification(), epsilons=epsilons)
     print(out)
 
     # robust_accuracy = 1 - success.float().mean(axis=-1)
