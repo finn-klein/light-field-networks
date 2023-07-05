@@ -101,7 +101,8 @@ robust_accs = list()
 for model_input, ground_truth in iter(dataloader): #will run infinitely
     #model_input, ground_truth = next(iter(dataloader)) # Dictionary
     inputs = model_input # (b, sidelength**2, 3)
-    rgb = model_input['query']['rgb'].cuda()
+    rgb = model_input['query']['rgb']
+    rgb = rgb.to(torch.float).cuda()
     intrinsics = model_input['query']['intrinsics'].cuda()
     pose = model_input['query']['cam2world'].cuda()
     uv = model_input['query']['uv'].cuda().float()
