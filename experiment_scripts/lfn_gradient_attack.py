@@ -119,7 +119,22 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     attack = fb.attacks.L2FastGradientAttack()
     print(attack)
 
-    out = attack(inputs, labels, criterion=labels)
+    epsilons = [
+        0.0002,
+        0.0005,
+        0.0008,
+        0.001,
+        0.0015,
+        0.002,
+        0.003,
+        0.01,
+        0.1,
+        0.3,
+        0.5,
+        1.0,
+    ]
+
+    out = attack(inputs, labels, criterion=labels, epsilons=epsilons)
     print(out)
 
     # robust_accuracy = 1 - success.float().mean(axis=-1)
