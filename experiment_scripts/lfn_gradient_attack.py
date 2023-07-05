@@ -105,7 +105,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     intrinsics = model_input['query']['intrinsics'].cuda()
     pose = model_input['query']['cam2world'].cuda()
     uv = model_input['query']['uv'].cuda().float()
-    labels = model_input['query']['class'].squeeze().cuda() # (b)
+    labels = model_input['query']['class'].squeeze().int().cuda() # (b)
 
     model.pose = pose
     model.intrinsics = intrinsics
@@ -119,7 +119,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
     attack = fb.attacks.L2FastGradientAttack()
     print(attack)
 
-    epsilons = np.arange(20)/20
+    epsilons = np.arange(20)/20*256
 
     out = attack(model=fmodel, inputs=rgb, criterion=fb.criteria.Misclassification(labels), epsilons=epsilons)
     print(out)
