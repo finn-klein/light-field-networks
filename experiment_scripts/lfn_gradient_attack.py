@@ -123,7 +123,7 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
 
     epsilons = np.arange(20)/20*256
 
-    out = attack(model=fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
+    out = attack(model=fmodel, inputs=rgb, criterion=labels, epsilons=epsilons, allow_unused=True)
     print(out)
 
     # robust_accuracy = 1 - success.float().mean(axis=-1)
