@@ -186,7 +186,7 @@ class LFAutoDecoder(LightFieldModel):
         z = self.latent_codes(instance_idcs)
         return z
 
-    def infer_and_classify(self, rgb, pose, intrinsics, uv, labels=None, detailed_logging=False):
+    def infer_and_classify(self, rgb, pose, intrinsics, uv, labels=None, detailed_logging=False, return_latents=False):
         b, n_ctxt = uv.shape[:2]
         n_qry, n_pix = uv.shape[1:3]
 
@@ -235,6 +235,8 @@ class LFAutoDecoder(LightFieldModel):
         print("predictions", pred_class.argmax(axis=-1))
         if self.out_path is not None:
             f.close()
+        if return_latents:
+            return pred_class, latent_codes.weight
         return pred_class
 
     def forward_classify(self, images):
@@ -246,6 +248,65 @@ class LFAutoDecoder(LightFieldModel):
         intrinsics = input["intrinsics"]
         uv = input["uv"].float()
         return self.infer_and_classify(rgb, pose, intrinsics, uv)
+
+    def adversarial_attack(self, rgb, pose, intrinsics, uv, max_epsilon=1e-1, num_adv_iters=100, adv_lr=1e-2):
+        b, n_ctxt = uv.shape[:2]
+        n_qry, n_pix = uv.shape[1:3]
+
+        pose = util.flatten_first_two(pose)
+        intrinsics = util.flatten_first_two(intrinsics)
+        uv = util.flatten_first_two(uv)
+
+        if self.out_path is not None:
+            f = open(self.out_path, "a")
+
+        # latent code optimization
+        with torch.enable_grad():
+            num_instances = rgb.shape[0]
+            latent_codes = nn.Embedding(num_instances, self.latent_dim).cuda() # num_instances, self.latent_dim
+            nn.init.zeros_(latent_codes.weight)
+
+            optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = self.lr)
+
+            for iter in range(self.num_iters):
+                light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
+                phi = self.get_light_field_function(latent_codes.weight)
+                lf_out = phi(light_field_coords)
+                novel_views = lf_out[..., :3]
+                novel_views = novel_views.view(b, n_qry, n_pix, 3)
+
+                loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(latent_codes.weight**2) * 100 # reg_weight = 100
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+
+
+        pred_class = self.linear_classifier(latent_codes.weight)
+        clean_acc = float((pred_class == labels).float().mean(axis=-1).cpu())
+        print(f"Clean accuracy: {clean_acc * 100:.1f}%")
+
+        print("Running adversarial attacks")
+
+        # Class weight is -1 because for adversarial attacks we want to increase class loss during gradient descent
+        loss = LFCLassLoss(l2_weight=1., reg_weight=1e2, class_weight=-1.)
+        optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = adv_lr)
+        for iter in range(num_adv_iters):
+            light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
+            phi = self.get_light_field_function(latent_codes.weight)
+            lf_out = phi(light_field_coords)
+            novel_views = lf_out[..., :3]
+            novel_views = novel_views.view(b, n_qry, n_pix, 3)
+            pred_class = self.linear_classifier(latent_codes.weight)
+            pred = {"rgb": novel_views, "class": pred_class, "z": latent_codes.weight}
+            gt = {"rgb": rgb, "class": labels}
+
+            losses, _ = loss(pred, gt)
+            optimizer.zero_grad()
+            loss.backward()
+            old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
+            optimizer.step()
+            # TODO: Check if any images are further than epsilon away from the originals, zero out the last optimizer step for those
+
 
 
 class LFEncoder(LightFieldModel):
