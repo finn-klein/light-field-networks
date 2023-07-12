@@ -10,6 +10,7 @@ import conv_modules
 import custom_layers
 import geometry
 import hyperlayers
+from loss_functions import LFClassLoss
 
 from torch.optim.lr_scheduler import LambdaLR
 
@@ -186,6 +187,16 @@ class LFAutoDecoder(LightFieldModel):
         z = self.latent_codes(instance_idcs)
         return z
 
+    def forward_render(self, latents, pose, uv, intrinsics, b, n_qry, n_pix):
+        """
+        Helper function to render image from latent code and camera information
+        """
+        light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
+        phi = self.get_light_field_function(latents)
+        lf_out = phi(light_field_coords)
+        novel_views = lf_out[..., :3]
+        return novel_views.view(b, n_qry, n_pix, 3)
+
     def infer_and_classify(self, rgb, pose, intrinsics, uv, labels=None, detailed_logging=False, return_latents=False):
         b, n_ctxt = uv.shape[:2]
         n_qry, n_pix = uv.shape[1:3]
@@ -207,11 +218,12 @@ class LFAutoDecoder(LightFieldModel):
             #scheduler = LambdaLR(optimizer, lr_lambda=lr_schedule)
 
             for iter in range(self.num_iters):
-                light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
-                phi = self.get_light_field_function(latent_codes.weight)
-                lf_out = phi(light_field_coords)
-                novel_views = lf_out[..., :3]
-                novel_views = novel_views.view(b, n_qry, n_pix, 3)
+                novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
+                # light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
+                # phi = self.get_light_field_function(latent_codes.weight)
+                # lf_out = phi(light_field_coords)
+                # novel_views = lf_out[..., :3]
+                # novel_views = novel_views.view(b, n_qry, n_pix, 3)
 
                 loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(latent_codes.weight**2) * 100 # reg_weight = 100
                 #print("Epoch", iter)
@@ -269,11 +281,7 @@ class LFAutoDecoder(LightFieldModel):
             optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = self.lr)
 
             for iter in range(self.num_iters):
-                light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
-                phi = self.get_light_field_function(latent_codes.weight)
-                lf_out = phi(light_field_coords)
-                novel_views = lf_out[..., :3]
-                novel_views = novel_views.view(b, n_qry, n_pix, 3)
+                novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
 
                 loss = nn.MSELoss()(novel_views, rgb) * 200 + torch.mean(latent_codes.weight**2) * 100 # reg_weight = 100
                 optimizer.zero_grad()
@@ -288,24 +296,27 @@ class LFAutoDecoder(LightFieldModel):
         print("Running adversarial attacks")
 
         # Class weight is -1 because for adversarial attacks we want to increase class loss during gradient descent
-        loss = LFCLassLoss(l2_weight=1., reg_weight=1e2, class_weight=-1.)
+        loss = LFClassLoss(l2_weight=1., reg_weight=1e2, class_weight=-1.)
         optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = adv_lr)
+        mask = [False]*self.num_instances #TODO: convert to boolean tensor?
         for iter in range(num_adv_iters):
-            light_field_coords = geometry.plucker_embedding(pose, uv, intrinsics)
-            phi = self.get_light_field_function(latent_codes.weight)
-            lf_out = phi(light_field_coords)
-            novel_views = lf_out[..., :3]
-            novel_views = novel_views.view(b, n_qry, n_pix, 3)
             pred_class = self.linear_classifier(latent_codes.weight)
+
             pred = {"rgb": novel_views, "class": pred_class, "z": latent_codes.weight}
             gt = {"rgb": rgb, "class": labels}
-
             losses, _ = loss(pred, gt)
             optimizer.zero_grad()
             loss.backward()
             old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
             optimizer.step()
             # TODO: Check if any images are further than epsilon away from the originals, zero out the last optimizer step for those
+            novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
+            distance = nn.MSELoss(novel_views, rgb, reduce="none")
+            #TODO: Sum over appropriate axes, take square root.
+            mask = (distance > max_epsilon)
+            #restore 
+            latent_codes.weight.data[mask] = old_latents[mask]
+            
 
 
 
