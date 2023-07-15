@@ -318,8 +318,9 @@ class LFAutoDecoder(LightFieldModel):
             old_latents.requires_grad_(False) # not sure if this is necessary
 
             terminate = False
-            while (not terminate and iter == 0):
-
+            cnt = 0
+            while (not terminate and iter == 0 and count < 10):
+                count += 1
                 optimizer.step()
                 novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
 
@@ -340,6 +341,7 @@ class LFAutoDecoder(LightFieldModel):
                     optimizer.param_groups[0]['lr'] /= 2
                 #restore 
                 latent_codes.weight.data[mask, :] = old_latents[mask, :]
+                print(f"lr: {optimizer.param_groups[0]['lr']}")
 
             print(f"----- Iteration {iter} -----")
             print(f"mask: {mask}")
