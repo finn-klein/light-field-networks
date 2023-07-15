@@ -18,5 +18,6 @@ python experiment_scripts/lfn_adversarial.py --data_root /home/woody/iwi9/iwi901
 --num_instances_per_class 256 \
 --batch_size 256 \
 --lr 1e-4 \
---single_class_string 0
+--single_class_string 0 \
+--adv_epsilon 0.001
 #done

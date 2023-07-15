@@ -38,6 +38,7 @@ p.add_argument('--max_num_observations', type=int, default=256, required=False)
 p.add_argument('--num_instances_per_class', type=int, required=False)
 p.add_argument('--out_file', type=str, required=False)
 p.add_argument('--eps', type=float, required=False)
+p.add_argument('--adv_epsilon', type=float, default=1e-1)
 opt = p.parse_args()
 
 if opt.out_file is not None:
@@ -100,5 +101,5 @@ for (model_input, ground_truth) in iter(dataloader):
     model.lr = opt.lr
     model.num_iters = num_iters
 
-    epsilon = 1e-1
+    epsilon = opt.adv_epsilon
     model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilon)
