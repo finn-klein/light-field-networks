@@ -39,6 +39,7 @@ p.add_argument('--num_instances_per_class', type=int, required=False)
 p.add_argument('--out_file', type=str, required=False)
 p.add_argument('--eps', type=float, required=False)
 p.add_argument('--adv_epsilon', type=float, default=1e-1)
+p.add_argument('--out_folder', type=str, required=False)
 opt = p.parse_args()
 
 if opt.out_file is not None:
@@ -102,4 +103,4 @@ for (model_input, ground_truth) in iter(dataloader):
     model.num_iters = num_iters
 
     epsilon = opt.adv_epsilon
-    model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilon)
+    model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilon, opt.out_folder)

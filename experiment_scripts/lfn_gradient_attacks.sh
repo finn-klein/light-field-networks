@@ -11,6 +11,8 @@ module load cuda/11.3.1
 module load git
 source activate lf
 
+mkdir adv_attacks/$SLURM_JOB_ID
+
 #for y in {0..12}; do
 python experiment_scripts/lfn_adversarial.py --data_root /home/woody/iwi9/iwi9015h/nmr/NMR_Dataset \
 --checkpoint_path /home/vault/iwi9/iwi9015h/experiments/train00/nmr/64_128_None/checkpoints/model_epoch_0006_iter_040000.pth \
@@ -19,5 +21,6 @@ python experiment_scripts/lfn_adversarial.py --data_root /home/woody/iwi9/iwi901
 --batch_size 256 \
 --lr 1e-4 \
 --single_class_string 0 \
---adv_epsilon 0.001
+--adv_epsilon 0.001 \
+--out_folder adv_attacks/$SLURM_JOB_ID
 #done

@@ -14,6 +14,8 @@ from loss_functions import LFClassLoss
 
 from torch.optim.lr_scheduler import LambdaLR
 
+from PIL import Image
+
 
 class LightFieldModel(nn.Module):
     def __init__(self, latent_dim, parameterization='plucker', network='relu',
@@ -261,7 +263,7 @@ class LFAutoDecoder(LightFieldModel):
         uv = input["uv"].float()
         return self.infer_and_classify(rgb, pose, intrinsics, uv)
 
-    def adversarial_attack(self, rgb, labels, pose, intrinsics, uv, max_epsilon=1e-1, num_adv_iters=100, adv_lr=1e-2):
+    def adversarial_attack(self, rgb, labels, pose, intrinsics, uv, max_epsilon=1e-1, num_adv_iters=100, adv_lr=1e-2, out_folder=None):
         # labels === ground truth labels
         b, n_ctxt = uv.shape[:2]
         n_qry, n_pix = uv.shape[1:3]
@@ -346,13 +348,26 @@ class LFAutoDecoder(LightFieldModel):
                 latent_codes.weight.data[mask, :] = old_latents[mask, :]
                 print(f"lr: {optimizer.param_groups[0]['lr']}")
 
-            #print(f"----- Iteration {iter} -----")
-            #print(f"mask: {mask}")
+            print(f"----- Iteration {iter} -----")
+            print(f"mask: {mask}")
             #print("")
         
         adv_pred_class = self.linear_classifier(latent_codes.weight)
         adv_pred_class = adv_pred_class.argmax(axis=-1)
-        adv_acc = float((adv_pred_class == labels).float().mean(axis=-1).cpu())
+        correct_predictions = (adv_pred_class == labels
+
+        # save all misclassifications
+        if out_folder is not None:
+            # final render
+            adv_rgb = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
+            for i in range(self.num_instances):
+                if not correct_predictions[i]:
+                    adv_img = adv_rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3])
+                    gt_img = rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3])
+                    Image.fromarray(adv_img).save(f"{out_folder}/{adv_i}.png")
+                    Image.fromarray(gt_img).save(f"{out_folder}/{gt_i}.png")
+
+        adv_acc = float(correct_predictions.float().mean(axis=-1).cpu())
         print(f"Adversarial accuracy: {adv_acc * 100:.1f}%")
 
 
