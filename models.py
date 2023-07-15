@@ -291,6 +291,7 @@ class LFAutoDecoder(LightFieldModel):
 
 
         pred_class = self.linear_classifier(latent_codes.weight)
+        pred_class = pred_class.argmax(axis=-1)
         clean_acc = float((pred_class == labels).float().mean(axis=-1).cpu())
         print(f"Clean accuracy: {clean_acc * 100:.1f}%")
 
