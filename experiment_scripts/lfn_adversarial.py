@@ -97,6 +97,7 @@ for (model_input, ground_truth) in iter(dataloader):
     pose = model_input['query']['cam2world'].cuda()
     uv = model_input['query']['uv'].cuda().float()
     labels = model_input['query']['class'].squeeze().cuda()
+    model.lr = options.lr
 
     epsilon = 1e-1
     model.adversarial_attack(rgb, pose, intrinsics, uv, epsilon)
