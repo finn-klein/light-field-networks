@@ -101,4 +101,4 @@ for (model_input, ground_truth) in iter(dataloader):
     model.num_iters = num_iters
 
     epsilon = 1e-1
-    model.adversarial_attack(rgb, pose, intrinsics, uv, epsilon)
+    model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilon)
