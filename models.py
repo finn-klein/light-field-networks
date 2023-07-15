@@ -319,8 +319,8 @@ class LFAutoDecoder(LightFieldModel):
 
             terminate = False
             cnt = 0
-            while (not terminate and iter == 0 and count < 10):
-                count += 1
+            while (not terminate and iter == 0 and cnt < 10):
+                cnt += 1
                 optimizer.step()
                 novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
 
