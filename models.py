@@ -362,10 +362,10 @@ class LFAutoDecoder(LightFieldModel):
             adv_rgb = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
             for i in range(self.num_instances):
                 if not correct_predictions[i]:
-                    adv_img = adv_rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3])
-                    gt_img = rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3])
-                    Image.fromarray(adv_img).save(f"{out_folder}/{adv_i}.png")
-                    Image.fromarray(gt_img).save(f"{out_folder}/{gt_i}.png")
+                    adv_img = adv_rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3]).cpu().numpy()
+                    gt_img = rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3]).cpu().numpy()
+                    Image.fromarray(adv_img).save(f"{out_folder}/adv_{i}.png")
+                    Image.fromarray(gt_img).save(f"{out_folder}/gt_{i}.png")
 
         adv_acc = float(correct_predictions.float().mean(axis=-1).cpu())
         print(f"Adversarial accuracy: {adv_acc * 100:.1f}%")
