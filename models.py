@@ -354,7 +354,7 @@ class LFAutoDecoder(LightFieldModel):
         
         adv_pred_class = self.linear_classifier(latent_codes.weight)
         adv_pred_class = adv_pred_class.argmax(axis=-1)
-        correct_predictions = (adv_pred_class == labels
+        correct_predictions = (adv_pred_class == labels)
 
         # save all misclassifications
         if out_folder is not None:
