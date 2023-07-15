@@ -19,7 +19,7 @@ python experiment_scripts/lfn_adversarial.py --data_root /home/woody/iwi9/iwi901
 --num_inference_iters 500 \
 --num_instances_per_class 256 \
 --batch_size 256 \
---lr 1e-4 \
+--lr 5e-4 \
 --single_class_string 0 \
 --adv_epsilon 0.001 \
 --out_folder adv_attacks/$SLURM_JOB_ID
