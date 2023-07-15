@@ -89,29 +89,14 @@ if opt.checkpoint_path is not None:
     del state_dict['latent_codes.weight']
     model.load_state_dict(state_dict, strict=False)
 
-fmodel = fb.PyTorchModel(model, bounds=(0, 1))
-
-
-for model_input, ground_truth in iter(dataloader):
-    rgb = model_input['query']['rgb']
-    rgb = rgb.to(torch.float).cuda()
+for (model_input, ground_truth) in iter(dataloader):
+    # def adversarial_attack(self, rgb, pose, intrinsics, uv, max_epsilon=1e-1, num_adv_iters=100, adv_lr=1e-3):
+    inputs = model_input
+    rgb = model_input['query']['rgb'].cuda()
     intrinsics = model_input['query']['intrinsics'].cuda()
     pose = model_input['query']['cam2world'].cuda()
     uv = model_input['query']['uv'].cuda().float()
-    labels = model_input['query']['class'].squeeze()
-    labels = labels.to(torch.int64).cuda()
+    labels = model_input['query']['class'].squeeze().cuda()
 
-    model.pose = pose
-    model.intrinsics = intrinsics
-    model.uv = uv
-    model.num_iters = opt.num_inference_iters
-    model.lr = opt.lr
-
-    print(f"clean accuracy:  {fb.accuracy(fmodel, rgb, labels) * 100:.1f} %") 
-    attack = fb.attacks.L2FastGradientAttack()
-    print(attack)
-
-    epsilons = np.arange(20)/20*256
-
-    out = attack(model=fmodel, inputs=rgb, criterion=labels, epsilons=epsilons, allow_unused=True)
-    print(out)
+    epsilon = 1e-1
+    model.adversarial_attack(rgb, pose, intrinsics, uv, epsilon)
