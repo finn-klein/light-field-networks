@@ -317,7 +317,7 @@ class LFAutoDecoder(LightFieldModel):
             old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
             old_latents.requires_grad_(False) # not sure if this is necessary
 
-            terminate = False:
+            terminate = False
             while (not terminate and iter == 0):
 
                 optimizer.step()
