@@ -346,9 +346,9 @@ class LFAutoDecoder(LightFieldModel):
                 latent_codes.weight.data[mask, :] = old_latents[mask, :]
                 print(f"lr: {optimizer.param_groups[0]['lr']}")
 
-            print(f"----- Iteration {iter} -----")
-            print(f"mask: {mask}")
-            print("")
+            #print(f"----- Iteration {iter} -----")
+            #print(f"mask: {mask}")
+            #print("")
         
         adv_pred_class = self.linear_classifier(latent_codes.weight)
         adv_pred_class = adv_pred_class.argmax(axis=-1)
