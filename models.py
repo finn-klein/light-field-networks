@@ -300,23 +300,36 @@ class LFAutoDecoder(LightFieldModel):
         optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = adv_lr)
         mask = [False]*self.num_instances #TODO: convert to boolean tensor?
         for iter in range(num_adv_iters):
+            novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
             pred_class = self.linear_classifier(latent_codes.weight)
-
             pred = {"rgb": novel_views, "class": pred_class, "z": latent_codes.weight}
             gt = {"rgb": rgb, "class": labels}
+
             losses, _ = loss(pred, gt)
             optimizer.zero_grad()
             loss.backward()
             old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
+            old_latents.requires_grad_(False) # not sure if this is necessary
             optimizer.step()
-            # TODO: Check if any images are further than epsilon away from the originals, zero out the last optimizer step for those
             novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
-            distance = nn.MSELoss(novel_views, rgb, reduce="none")
-            #TODO: Sum over appropriate axes, take square root.
+
+            def batched_l2_distance(x, y, axes):
+                """Compute the batched l2 distance of x to y along the described axes"""
+                axes.sort()
+                axes = axes[::-1]
+                result = (x - y).pow(2)
+                for axis in axes:
+                    result = result.sum(axis)
+                return result.sqrt().flatten()
+            
+            distance = batched_l2_distance(novel_views, rgb, [2, 3])
             mask = (distance > max_epsilon)
             #restore 
-            latent_codes.weight.data[mask] = old_latents[mask]
-            
+            latent_codes.weight.data[mask, :] = old_latents[mask, :]
+        
+        adv_pred_class = self.linear_classifier(latent_codes.weight)
+        adv_acc = float((adv_pred_class == labels).float().mean(axis=-1).cpu())
+        print(f"Clean accuracy: {adv_acc * 100:.1f}%")
 
 
 
