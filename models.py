@@ -337,7 +337,7 @@ class LFAutoDecoder(LightFieldModel):
                 terminate = not mask.all()
                 if iter == 0:
                     # half optimizer LR, restore and retry
-                    optimizer.lr /= 2
+                    optimizer.param_groups[0]['lr'] /= 2
                 #restore 
                 latent_codes.weight.data[mask, :] = old_latents[mask, :]
 
