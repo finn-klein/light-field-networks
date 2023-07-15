@@ -316,22 +316,30 @@ class LFAutoDecoder(LightFieldModel):
             total_loss.backward()
             old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
             old_latents.requires_grad_(False) # not sure if this is necessary
-            optimizer.step()
-            novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
 
-            def batched_l2_distance(x, y, axes):
-                """Compute the batched l2 distance of x to y along the described axes"""
-                axes.sort()
-                axes = axes[::-1]
-                result = (x - y).pow(2)
-                for axis in axes:
-                    result = result.sum(axis)
-                return result.sqrt().flatten()
-            
-            distance = batched_l2_distance(novel_views, rgb, [2, 3])
-            mask = (distance > max_epsilon)
-            #restore 
-            latent_codes.weight.data[mask, :] = old_latents[mask, :]
+            terminate = False:
+            while (not terminate and iter == 0):
+
+                optimizer.step()
+                novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
+
+                def batched_l2_distance(x, y, axes):
+                    """Compute the batched l2 distance of x to y along the described axes"""
+                    axes.sort()
+                    axes = axes[::-1]
+                    result = (x - y).pow(2)
+                    for axis in axes:
+                        result = result.sum(axis)
+                    return result.sqrt().flatten()
+                
+                distance = batched_l2_distance(novel_views, rgb, [2, 3])
+                mask = (distance > max_epsilon)
+                terminate = not mask.all()
+                if iter == 0:
+                    # half optimizer LR, restore and retry
+                    optimizer.lr /= 2
+                #restore 
+                latent_codes.weight.data[mask, :] = old_latents[mask, :]
 
             print(f"----- Iteration {iter} -----")
             print(f"mask: {mask}")
