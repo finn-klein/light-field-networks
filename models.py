@@ -298,7 +298,7 @@ class LFAutoDecoder(LightFieldModel):
         print("Running adversarial attacks")
 
         # Class weight is -1 because for adversarial attacks we want to increase class loss during gradient descent
-        loss = LFClassLoss(l2_weight=1., reg_weight=1e2, class_weight=-1.)
+        loss_function = LFClassLoss(l2_weight=1., reg_weight=1e2, class_weight=-1.)
         optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = adv_lr)
         mask = [False]*self.num_instances #TODO: convert to boolean tensor?
         for iter in range(num_adv_iters):
@@ -307,9 +307,13 @@ class LFAutoDecoder(LightFieldModel):
             pred = {"rgb": novel_views, "class": pred_class, "z": latent_codes.weight}
             gt = {"rgb": rgb, "class": labels}
 
-            losses, _ = loss(pred, gt)
+            losses, _ = loss_function(pred, gt)
+            total_loss = 0
+            for loss_name, loss in losses.items():
+                single_loss = loss.mean()
+                total_loss += single_loss
             optimizer.zero_grad()
-            loss.backward()
+            total_loss.backward()
             old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
             old_latents.requires_grad_(False) # not sure if this is necessary
             optimizer.step()
