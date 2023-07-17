@@ -32,6 +32,7 @@ p.add_argument('--batch_size', type=int, default=128)
 p.add_argument('--max_num_instances', type=int, default=None)
 p.add_argument('--num_trgt', type=int, default=1)
 p.add_argument('--gpus', type=int, default=1)
+p.add_argument('--latent_dim', type=int, default=256)
 
 # General training options
 p.add_argument('--lr', type=float, default=1e-4)
@@ -75,7 +76,7 @@ def multigpu_train(gpu, opt, cache):
         return train_loader
     
     num_instances = multiclass_dataio.get_num_instances(opt.data_root, 'train')
-    model = models.LFAutoDecoder(latent_dim=256, num_instances=num_instances, parameterization='plucker',
+    model = models.LFAutoDecoder(latent_dim=opt.latent_dim, num_instances=num_instances, parameterization='plucker',
                                  network=opt.network, conditioning=opt.conditioning).cuda()
 
     if opt.checkpoint_path is not None:
