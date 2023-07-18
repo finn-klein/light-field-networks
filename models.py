@@ -291,7 +291,6 @@ class LFAutoDecoder(LightFieldModel):
                 loss.backward()
                 optimizer.step()
 
-
         pred_class = self.linear_classifier(latent_codes.weight)
         pred_class = pred_class.argmax(axis=-1)
         clean_acc = float((pred_class == labels).float().mean(axis=-1).cpu())
@@ -364,8 +363,8 @@ class LFAutoDecoder(LightFieldModel):
                 if not correct_predictions[i]:
                     adv_img = adv_rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3]).cpu().detach().numpy()
                     gt_img = rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3]).cpu().detach().numpy()
-                    Image.fromarray(adv_img).save(f"{out_folder}/adv_{i}.png")
-                    Image.fromarray(gt_img).save(f"{out_folder}/gt_{i}.png")
+                    Image.fromarray(adv_img).save(f"{out_folder}/adv_{i}.png", mode="RGB")
+                    Image.fromarray(gt_img).save(f"{out_folder}/gt_{i}.png", mode="RGB")
 
         adv_acc = float(correct_predictions.float().mean(axis=-1).cpu())
         print(f"Adversarial accuracy: {adv_acc * 100:.1f}%")
