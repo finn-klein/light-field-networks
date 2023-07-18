@@ -40,6 +40,7 @@ p.add_argument('--spec_observation_idcs', type=str, default=None)
 p.add_argument('--single_class_string', default=None)
 p.add_argument('--disable_shuffle', default=None)
 p.add_argument('--num_instances_per_class', type=int, default=None)
+p.add_argument('--latent_dim', type=int, default=256)
 opt = p.parse_args()
 
 if opt.single_class_string is not None:
@@ -79,7 +80,7 @@ def multigpu_train(gpu, opt, cache):
         return train_loader
     
     num_instances = multiclass_dataio.get_num_instances(opt.data_root, 'train')
-    model = models.LFAutoDecoder(latent_dim=256, num_instances=num_instances, parameterization='plucker').cuda()
+    model = models.LFAutoDecoder(latent_dim=opt.latent_dim, num_instances=num_instances, parameterization='plucker').cuda()
 
     print(f"Loading weights from {opt.checkpoint_path}...")
     state_dict = torch.load(opt.checkpoint_path)
