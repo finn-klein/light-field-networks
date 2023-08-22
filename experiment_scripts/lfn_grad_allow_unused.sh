@@ -21,6 +21,4 @@ python experiment_scripts/lfn_grad_allow_unused.py --data_root /home/woody/iwi9/
 --batch_size 256 \
 --lr 5e-4 \
 --single_class_string 0 \
---adv_epsilon 0.001 \
---out_folder adv_attacks/$SLURM_JOB_ID
 #done
