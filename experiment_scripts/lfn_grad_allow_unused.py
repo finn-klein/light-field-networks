@@ -17,7 +17,7 @@ from models import LFAutoDecoder
 import util
 p = configargparse.ArgumentParser()
 p.add('-c', '--config_filepath', required=False, is_config_file=True)
-p.add_argument('--attack_name', type=str, required=True)
+#p.add_argument('--attack_name', type=str, required=True)
 p.add_argument('--data_root', required=True)
 p.add_argument('--single_class_string', type=str, required=False)
 p.add_argument('--checkpoint_path', type=str)
