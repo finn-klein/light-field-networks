@@ -83,7 +83,7 @@ model.fc = torch.nn.Linear(in_feat, num_classes)
 state_dict = torch.load(opt.checkpoint_path)
 model.load_state_dict(state_dict)
 # preprocessing??
-fmodel = fb.PyTorchModel(model, bounds=(0, 1))
+fmodel = fb.PyTorchModel(model, bounds=(0, 256))
 
 
 robust_accs = list()
