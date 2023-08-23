@@ -28,6 +28,7 @@ p.add("--batch_size", default=256)
 p.add("--out_file", type=str, required=False)
 p.add("--single_class_string", type=str, required=True)
 p.add('--max_num_instances', type=int, default=256)
+p.add("--n_steps", type=int, default=1)
 opt = p.parse_args()
 
 if opt.out_file is not None:
