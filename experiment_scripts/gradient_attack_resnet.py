@@ -112,14 +112,16 @@ for imgs, labels in dataloader:
     print('labels', labels.size())
     raw_advs, clipped_advs, success = attack(fmodel, inputs=imgs, criterion=labels, epsilons=epsilons)
     robust_accuracy = 1 - success.float().mean(axis=-1)
-    robust_accs.append(robust_accuracy)
+    robust_accs.append(robust_accuracy.detach().cpu().numpy())
 
-    if opt.out_file is not None:
-        for (eps, acc) in zip(epsilons, robust_accuracy):
-            out_file.write(f"{eps:<6} {acc.item() * 100:4.1f}\n")
+accs_total = np.array(robust_accs).mean(axis=0)
 
-    else:
-        print("robust accuracy for perturbations with")
-        for (eps, acc) in zip(epsilons, robust_accuracy):
-            print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
-        print()
+if opt.out_file is not None:
+    for (eps, acc) in zip(epsilons, accs_total):
+        out_file.write(f"{eps:<6} {acc.item() * 100:4.1f}\n")
+
+else:
+    print("robust accuracy for perturbations with")
+    for (eps, acc) in zip(epsilons, accs_total):
+        print(f"  Linf norm ≤ {eps:<6}: {acc.item() * 100:4.1f} %")
+    print()
