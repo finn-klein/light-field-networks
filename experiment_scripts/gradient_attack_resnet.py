@@ -108,7 +108,7 @@ for imgs, labels in dataloader:
     # ]
     epsilons = list(range(20))
     epsilons = [x/20 for x in epsilons]
-    epsilons = [x*256 for x in epsilons]
+    epsilons = [x*12.8 for x in epsilons]
     print('labels', labels.size())
     raw_advs, clipped_advs, success = attack(fmodel, inputs=imgs, criterion=labels, epsilons=epsilons)
     robust_accuracy = 1 - success.float().mean(axis=-1)
