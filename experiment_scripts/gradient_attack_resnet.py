@@ -89,7 +89,7 @@ robust_accs = list()
 for imgs, labels in dataloader:
     imgs = imgs.to(device)
     labels = labels.to(device)
-    attack = fb.attacks.L2ProjectedGradientAttack(steps=100), random_start=False)
+    attack = fb.attacks.L2ProjectedGradientAttack(steps=100, random_start=False)
     # epsilons = [
     #     0.0,
     #     0.0002,
