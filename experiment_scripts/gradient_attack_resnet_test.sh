@@ -16,6 +16,6 @@ lfn_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train00/nmr/64_128_None/che
 ff_root_path="/home/woody/iwi9/iwi9015h/nmr_ff_test"
 ff_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train_baseline00/checkpoints/best.pth"
 
-python $script_path/gradient_attack_resnet.py --data_root $ff_root_path --single_class_string 0 --out_file $WORK/experiments/grad_resnet_test/test2.txt --checkpoint_path $ff_ckpt_path
+python $script_path/gradient_attack_resnet.py --data_root $ff_root_path --single_class_string 0 --out_file $WORK/experiments/grad_resnet_test/test2.txt --checkpoint_path $ff_ckpt_path --n_steps 50
 
 exit 1
