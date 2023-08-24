@@ -28,7 +28,7 @@ p.add("--batch_size", default=256)
 p.add("--out_file", type=str, required=False)
 p.add("--single_class_string", type=str, required=True)
 p.add('--max_num_instances', type=int, default=256)
-p.add("--n_steps", type=int, default=1)
+p.add("--n_steps", type=int, default=15)
 opt = p.parse_args()
 
 if opt.out_file is not None:
@@ -83,7 +83,7 @@ model.fc = torch.nn.Linear(in_feat, num_classes)
 state_dict = torch.load(opt.checkpoint_path)
 model.load_state_dict(state_dict)
 # preprocessing??
-fmodel = fb.PyTorchModel(model, bounds=(0, 256))
+fmodel = fb.PyTorchModel(model, bounds=(0, 1))
 
 
 robust_accs = list()
