@@ -34,5 +34,9 @@ for c in classes:
                                         specific_classes=[c])
     
     for x in dataset.all_instances:
-        img = Image.fromarray((x[opt.angle]['rgb'].numpy().reshape(64, 64, 3)*255).astype("uint8"), mode="RGB")
+        img_raw = x[opt.angle]['rgb'].numpy().reshape(64, 64, 3) # range (-1, 1)
+        img_raw /= 2 # (-.5, .5)
+        img_raw += .5 # (0, 1)
+        img_raw *= 255 # (0, 255)
+        img = Image.fromarray(img_raw.astype("uint8"), mode="RGB")
         img.save(f"{opt.out_path}/{c}/{x.instance_name}.png")
