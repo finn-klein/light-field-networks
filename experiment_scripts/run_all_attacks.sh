@@ -25,7 +25,7 @@ attacks=("l2gauss" "l2uniform" "l2clippinggauss" "l2clippinguniform" "linfunifor
 script_path="/home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts"
 lfn_root_path="/home/woody/iwi9/iwi9015h/nmr/NMR_Dataset"
 lfn_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train00/nmr/64_128_None/checkpoints/model_epoch_0006_iter_040000.pth"
-ff_root_path="/home/woody/iwi9/iwi9015h/nmr_ff_test"
+ff_root_path="/home/woody/iwi9/iwi9015h/nmr_ff_test_2"
 ff_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train_baseline00/checkpoints/best.pth"
 
 echo "experiment folder: $1"
@@ -39,24 +39,24 @@ mkdir $1
 cd $1
 
 # --- LFN ---
-mkdir LFN
-cd LFN
-echo "LFN"
+# mkdir LFN
+# cd LFN
+# echo "LFN"
 
-for class in {0..12}; do
-  mkdir $class
-  cd $class
-  for attack in "${attacks[@]}"
-  do
-    mkdir $attack
-    cd $attack
-    echo "$attack"
-    python $script_path/adv_attacks.py --data_root $lfn_root_path --attack_name $attack --single_class_string $class --out_file lfn_${attack}_${class}.txt --checkpoint_path $lfn_ckpt_path
-    cd ..
-  done
-  cd ..
-done
-cd ..
+# for class in {0..12}; do
+#   mkdir $class
+#   cd $class
+#   for attack in "${attacks[@]}"
+#   do
+#     mkdir $attack
+#     cd $attack
+#     echo "$attack"
+#     python $script_path/adv_attacks.py --data_root $lfn_root_path --attack_name $attack --single_class_string $class --out_file lfn_${attack}_${class}.txt --checkpoint_path $lfn_ckpt_path
+#     cd ..
+#   done
+#   cd ..
+# done
+# cd ..
 
 # --- FF ---
 mkdir FF
