@@ -23,4 +23,4 @@ for class in {0..12}; do
     --single_class_string ${class} \
     --out_folder $1
     --out_file ${class}
-#done
+done
