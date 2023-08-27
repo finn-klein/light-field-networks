@@ -378,7 +378,7 @@ class LFAutoDecoder(LightFieldModel):
 
             adv_acc = float(correct_predictions.float().mean(axis=-1).cpu())
             if out_folder is not None:
-                out_file.write(f"{eps}: {adv_acc}")
+                out_file.write(f"{eps}: {adv_acc}\n")
             print(f"Adversarial accuracy: {adv_acc * 100:.1f}%")
 
             # Restore clean latents
