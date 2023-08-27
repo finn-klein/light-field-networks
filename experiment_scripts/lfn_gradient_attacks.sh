@@ -21,5 +21,6 @@ for class in {0..12}; do
     --batch_size 256 \
     --lr 5e-4 \
     --single_class_string ${class} \
-    --out_folder $1/${class}
+    --out_folder $1
+    --out_file ${class}
 #done

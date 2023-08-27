@@ -42,9 +42,6 @@ p.add_argument('--adv_epsilon', type=float, default=1e-1)
 p.add_argument('--out_folder', type=str, required=False)
 opt = p.parse_args()
 
-if opt.out_file is not None:
-    out_file = open(opt.out_file, "w")
-
 lr = opt.lr
 num_iters = opt.num_inference_iters
 
@@ -105,4 +102,4 @@ for (model_input, ground_truth) in iter(dataloader):
     epsilons = list(range(20))
     epsilons = [x/40 for x in epsilons]
     epsilons += [(x+10)/20 for x in range(10)]
-    model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilons, out_folder = opt.out_folder)
+    model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilons, out_folder=opt.out_folder, out_file=opt.out_file)

@@ -263,7 +263,7 @@ class LFAutoDecoder(LightFieldModel):
         uv = input["uv"].float()
         return self.infer_and_classify(rgb, pose, intrinsics, uv)
 
-    def adversarial_attack(self, rgb, labels, pose, intrinsics, uv, epsilons=1e-1, num_adv_iters=50, adv_lr=1e-2, out_folder=None, save_imgs = False):
+    def adversarial_attack(self, rgb, labels, pose, intrinsics, uv, epsilons=1e-1, num_adv_iters=50, adv_lr=1e-2, out_folder=None, save_imgs = False, out_file=None):
         # labels === ground truth labels
         b, n_ctxt = uv.shape[:2]
         n_qry, n_pix = uv.shape[1:3]
@@ -275,8 +275,8 @@ class LFAutoDecoder(LightFieldModel):
         if self.out_path is not None:
             f = open(self.out_path, "a")
         
-        if out_folder is not None:
-            out_file = open(f"{out_folder}/acc.txt", "w")
+        if out_folder is not None and out_file is not None:
+            out_file = open(f"{out_folder}/{out_file}.txt", "w")
 
         # latent code optimization
         with torch.enable_grad():
