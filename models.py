@@ -345,7 +345,7 @@ class LFAutoDecoder(LightFieldModel):
                         return 1/norm * result.sqrt().flatten()
                     
                     distance = batched_l2_distance(novel_views, rgb, [2, 3])
-                    print(distance)
+                    #print(distance)
                     mask = (distance > eps)
                     terminate = not mask.all()
                     if iter == 0:
