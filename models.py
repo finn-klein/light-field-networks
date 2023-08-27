@@ -342,7 +342,8 @@ class LFAutoDecoder(LightFieldModel):
                         for axis in axes:
                             norm *= result.shape[axis]
                             result = result.sum(axis)
-                        return 1/norm * result.sqrt().flatten()
+                        #return 1/norm * result.sqrt().flatten()
+                        return result.sqrt().flatten()
                     
                     distance = batched_l2_distance(novel_views, rgb, [2, 3])
                     #print(distance)
