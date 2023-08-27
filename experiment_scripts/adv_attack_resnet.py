@@ -121,6 +121,7 @@ for imgs, labels in dataloader:
     # ]
     epsilons = list(range(20))
     epsilons = [x/40 for x in epsilons]
+    epsilons += [(x+10)/20 for x in range(10)]
 
     epsilons = [x*256 for x in epsilons]
     print('labels', labels.size())
