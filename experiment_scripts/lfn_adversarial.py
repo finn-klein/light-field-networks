@@ -102,5 +102,7 @@ for (model_input, ground_truth) in iter(dataloader):
     model.lr = opt.lr
     model.num_iters = num_iters
 
-    epsilon = opt.adv_epsilon
-    model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilon, out_folder = opt.out_folder)
+    epsilons = list(range(20))
+    epsilons = [x/40 for x in epsilons]
+    epsilons += [(x+10)/20 for x in range(10)]
+    model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilons, out_folder = opt.out_folder)
