@@ -263,7 +263,7 @@ class LFAutoDecoder(LightFieldModel):
         uv = input["uv"].float()
         return self.infer_and_classify(rgb, pose, intrinsics, uv)
 
-    def adversarial_attack(self, rgb, labels, pose, intrinsics, uv, max_epsilon=1e-1, num_adv_iters=100, adv_lr=1e-2, out_folder=None):
+    def adversarial_attack(self, rgb, labels, pose, intrinsics, uv, epsilons=1e-1, num_adv_iters=50, adv_lr=1e-2, out_folder=None, save_imgs = False):
         # labels === ground truth labels
         b, n_ctxt = uv.shape[:2]
         n_qry, n_pix = uv.shape[1:3]
@@ -274,6 +274,9 @@ class LFAutoDecoder(LightFieldModel):
 
         if self.out_path is not None:
             f = open(self.out_path, "a")
+        
+        if out_folder is not None:
+            out_file = open(f"{out_folder}/acc.txt", "w")
 
         # latent code optimization
         with torch.enable_grad():
@@ -296,80 +299,90 @@ class LFAutoDecoder(LightFieldModel):
         clean_acc = float((pred_class == labels).float().mean(axis=-1).cpu())
         print(f"Clean accuracy: {clean_acc * 100:.1f}%")
 
+        # Save clean latents to restore later
+        clean_latents = latent_codes.weight.data.clone()
+
         print("Running adversarial attacks")
-
-        # Class weight is -1 because for adversarial attacks we want to increase class loss during gradient descent
-        loss_function = LFClassLoss(l2_weight=1., reg_weight=1e2, class_weight=-1.)
-        optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = adv_lr)
-        mask = [False]*self.num_instances #TODO: convert to boolean tensor?
-        for iter in range(num_adv_iters):
-            novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
-            pred_class = self.linear_classifier(latent_codes.weight)
-            pred = {"rgb": novel_views, "class": pred_class, "z": latent_codes.weight}
-            gt = {"rgb": rgb, "class": labels}
-
-            losses, _ = loss_function(pred, gt)
-            total_loss = 0
-            for loss_name, loss in losses.items():
-                single_loss = loss.mean()
-                total_loss += single_loss
-            optimizer.zero_grad()
-            total_loss.backward()
-            old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
-            old_latents.requires_grad_(False) # not sure if this is necessary
-
-            terminate = False
-            cnt = 0
-            while (not terminate and iter == 0 and cnt < 10):
-                cnt += 1
-                optimizer.step()
-                novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
-
-                def batched_l2_distance(x, y, axes):
-                    """Compute the batched l2 distance of x to y along the described axes"""
-                    axes.sort()
-                    axes = axes[::-1]
-                    norm = 1
-                    result = (x - y).pow(2)
-                    for axis in axes:
-                        norm *= result.shape[axis]
-                        result = result.sum(axis)
-                    return 1/norm * result.sqrt().flatten()
-                
-                distance = batched_l2_distance(novel_views, rgb, [2, 3])
-                print(distance)
-                mask = (distance > max_epsilon)
-                terminate = not mask.all()
-                if iter == 0:
-                    # half optimizer LR, restore and retry
-                    optimizer.param_groups[0]['lr'] /= 2
-                #restore 
-                latent_codes.weight.data[mask, :] = old_latents[mask, :]
-                print(f"lr: {optimizer.param_groups[0]['lr']}")
-
-            print(f"----- Iteration {iter} -----")
-            print(f"mask: {mask}")
-            #print("")
         
-        adv_pred_class = self.linear_classifier(latent_codes.weight)
-        adv_pred_class = adv_pred_class.argmax(axis=-1)
-        correct_predictions = (adv_pred_class == labels)
+        for eps in epsilons:
+            print(f"epsilon: {eps}")
+            # Class weight is -1 because for adversarial attacks we want to increase class loss during gradient descent
+            loss_function = LFClassLoss(l2_weight=1., reg_weight=1e2, class_weight=-1.)
+            optimizer = torch.optim.Adam(params = [latent_codes.weight], lr = adv_lr)
+            mask = [False]*self.num_instances
+            for iter in range(num_adv_iters):
+                novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
+                pred_class = self.linear_classifier(latent_codes.weight)
+                pred = {"rgb": novel_views, "class": pred_class, "z": latent_codes.weight}
+                gt = {"rgb": rgb, "class": labels}
 
-        # save all misclassifications
-        if out_folder is not None:
-            # final render
-            adv_rgb = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
-            for i in range(self.num_instances):
-                if not correct_predictions[i]:
-                    adv_img = adv_rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3]).cpu().detach().numpy()*255
-                    adv_img = adv_img.astype(np.uint8)
-                    gt_img = rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3]).cpu().detach().numpy()*255
-                    gt_img = gt_img.astype(np.uint8)
-                    Image.fromarray(adv_img).save(f"{out_folder}/adv_{i}.png", mode="RGB")
-                    Image.fromarray(gt_img).save(f"{out_folder}/gt_{i}.png", mode="RGB")
+                losses, _ = loss_function(pred, gt)
+                total_loss = 0
+                for loss_name, loss in losses.items():
+                    single_loss = loss.mean()
+                    total_loss += single_loss
+                optimizer.zero_grad()
+                total_loss.backward()
+                old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
+                old_latents.requires_grad_(False) # not sure if this is necessary
 
-        adv_acc = float(correct_predictions.float().mean(axis=-1).cpu())
-        print(f"Adversarial accuracy: {adv_acc * 100:.1f}%")
+                terminate = False
+                cnt = 0
+                while (not terminate and iter == 0 and cnt < 10):
+                    cnt += 1
+                    optimizer.step()
+                    novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
+
+                    def batched_l2_distance(x, y, axes):
+                        """Compute the batched l2 distance of x to y along the described axes"""
+                        axes.sort()
+                        axes = axes[::-1]
+                        norm = 1
+                        result = (x - y).pow(2)
+                        for axis in axes:
+                            norm *= result.shape[axis]
+                            result = result.sum(axis)
+                        return 1/norm * result.sqrt().flatten()
+                    
+                    distance = batched_l2_distance(novel_views, rgb, [2, 3])
+                    print(distance)
+                    mask = (distance > eps)
+                    terminate = not mask.all()
+                    if iter == 0:
+                        # half optimizer LR, restore and retry
+                        optimizer.param_groups[0]['lr'] /= 2
+                    #restore 
+                    latent_codes.weight.data[mask, :] = old_latents[mask, :]
+                    print(f"lr: {optimizer.param_groups[0]['lr']}")
+
+                print(f"----- Iteration {iter} -----")
+                #print(f"mask: {mask}")
+                #print("")
+            
+            adv_pred_class = self.linear_classifier(latent_codes.weight)
+            adv_pred_class = adv_pred_class.argmax(axis=-1)
+            correct_predictions = (adv_pred_class == labels)
+
+            # save all misclassifications
+            if out_folder is not None and save_imgs:
+                # final render
+                adv_rgb = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
+                for i in range(self.num_instances):
+                    if not correct_predictions[i]:
+                        adv_img = adv_rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3]).cpu().detach().numpy()*255
+                        adv_img = adv_img.astype(np.uint8)
+                        gt_img = rgb[i, :, :, :].squeeze(1).reshape([64, 64, 3]).cpu().detach().numpy()*255
+                        gt_img = gt_img.astype(np.uint8)
+                        Image.fromarray(adv_img).save(f"{out_folder}/adv_{i}.png", mode="RGB")
+                        Image.fromarray(gt_img).save(f"{out_folder}/gt_{i}.png", mode="RGB")
+
+            adv_acc = float(correct_predictions.float().mean(axis=-1).cpu())
+            if out_folder is not None:
+                out_file.write(f"{eps}: {adv_acc}")
+            print(f"Adversarial accuracy: {adv_acc * 100:.1f}%")
+
+            # Restore clean latents
+            latent_codes.weight.data = clean_latents
 
 
 
