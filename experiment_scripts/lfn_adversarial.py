@@ -102,4 +102,5 @@ for (model_input, ground_truth) in iter(dataloader):
     epsilons = list(range(20))
     epsilons = [x/40 for x in epsilons]
     epsilons += [(x+10)/20 for x in range(10)]
+    epsilons = [x * 256 for x in epsilons]
     model.adversarial_attack(rgb, labels, pose, intrinsics, uv, epsilons, out_folder=opt.out_folder, out_file=opt.out_file)

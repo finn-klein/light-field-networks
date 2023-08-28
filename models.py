@@ -263,7 +263,7 @@ class LFAutoDecoder(LightFieldModel):
         uv = input["uv"].float()
         return self.infer_and_classify(rgb, pose, intrinsics, uv)
 
-    def adversarial_attack(self, rgb, labels, pose, intrinsics, uv, epsilons=1e-1, num_adv_iters=50, adv_lr=1e-2, out_folder=None, save_imgs = False, out_file=None):
+    def adversarial_attack(self, rgb, labels, pose, intrinsics, uv, epsilons=1e-1, num_adv_iters=50, adv_lr=7e-4, out_folder=None, save_imgs = False, out_file=None):
         # labels === ground truth labels
         b, n_ctxt = uv.shape[:2]
         n_qry, n_pix = uv.shape[1:3]
