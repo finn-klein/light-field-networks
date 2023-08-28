@@ -11,7 +11,7 @@
 # log_root should be the root folder path for the logs and should not exist
 # (Model paths, data root hard-coded for now)
 
-#SBATCH --job-name=lfn_2_l2gauss
+#SBATCH --job-name=run_adv_attacks_lfn
 #SBATCH --time=24:00:00
 #SBATCH --gres=gpu:a100:1 --partition=a100
 #SBATCH --export=NONE
@@ -39,9 +39,28 @@ mkdir $1
 cd $1
 
 # --- LFN ---
-# mkdir LFN
-# cd LFN
-# echo "LFN"
+mkdir LFN
+cd LFN
+echo "LFN"
+for class in {0..12}; do
+  mkdir $class
+  cd $class
+  for attack in "${attacks[@]}"
+  do
+    mkdir $attack
+    cd $attack
+    echo "$attack"
+    python $script_path/adv_attacks.py --data_root $lfn_root_path --attack_name $attack --single_class_string $class --out_file lfn_${attack}_${class}.txt --checkpoint_path $lfn_ckpt_path
+    cd ..
+  done
+  cd ..
+done
+cd ..
+
+# --- FF ---
+# mkdir FF
+# cd FF
+# echo "FF"
 
 # for class in {0..12}; do
 #   mkdir $class
@@ -51,30 +70,10 @@ cd $1
 #     mkdir $attack
 #     cd $attack
 #     echo "$attack"
-#     python $script_path/adv_attacks.py --data_root $lfn_root_path --attack_name $attack --single_class_string $class --out_file lfn_${attack}_${class}.txt --checkpoint_path $lfn_ckpt_path
+#     python $script_path/adv_attack_resnet.py --data_root $ff_root_path --attack_name $attack --single_class_string $class --out_file ff_${attack}_${class}.txt --checkpoint_path $ff_ckpt_path
 #     cd ..
 #   done
 #   cd ..
 # done
-# cd ..
-
-# --- FF ---
-mkdir FF
-cd FF
-echo "FF"
-
-for class in {0..12}; do
-  mkdir $class
-  cd $class
-  for attack in "${attacks[@]}"
-  do
-    mkdir $attack
-    cd $attack
-    echo "$attack"
-    python $script_path/adv_attack_resnet.py --data_root $ff_root_path --attack_name $attack --single_class_string $class --out_file ff_${attack}_${class}.txt --checkpoint_path $ff_ckpt_path
-    cd ..
-  done
-  cd ..
-done
 
 exit 1
