@@ -343,7 +343,7 @@ class LFAutoDecoder(LightFieldModel):
                 # During first iteration, try to adjust LR such that not all latents are immediately moved outside the limit
                 terminate = False
                 cnt = 0
-                while (not terminate and iter == 0 and cnt < 10):
+                while (not terminate and iter == 0 and cnt < 50):
                     cnt += 1
                     optimizer.step()
                     novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
