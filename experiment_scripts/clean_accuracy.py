@@ -94,6 +94,7 @@ for c in range(13):
 
     # Initialize dataset
     dataset_ff = datasets.ImageFolder(opt.data_root_ff)
+    num_classes = len(dataset_ff.find_classes(opt.data_root_ff)[0])
     dataset_ff = [(item, label) for (item, label) in dataset_ff if label==c]
     dataloader_ff = DataLoader(dataset_ff, batch_size=opt.batch_size, shuffle=False, num_workers=0, collate_fn=collate)
 
@@ -113,7 +114,7 @@ for c in range(13):
     fmodel_lfn = fb.PyTorchModel(model_lfn, bounds=(-1, 1))
 
     # --- init FF ---
-    num_classes = len(dataset_ff.find_classes(opt.data_root_ff)[0])
+
     model_ff = torchvision.models.resnet50().eval()
     model_ff = model_ff.cuda()
     in_feat = model_ff.fc.in_features
