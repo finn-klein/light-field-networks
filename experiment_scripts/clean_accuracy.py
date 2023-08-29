@@ -115,7 +115,7 @@ for c in range(13):
     # --- init FF ---
 
     model_ff = torchvision.models.resnet50().eval()
-    model_ff = model_ff.to(device)
+    model_ff = model_ff.cuda()
     in_feat = model_ff.fc.in_features
     model_ff.fc = torch.nn.Linear(in_feat, num_classes)
     state_dict = torch.load(opt.checkpoint_path_ff)
