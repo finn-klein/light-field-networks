@@ -357,7 +357,7 @@ class LFAutoDecoder(LightFieldModel):
                     print(f"lr: {optimizer.param_groups[0]['lr']}")
 
                 print(f"----- Iteration {iter} -----")
-                #print(f"mask: {mask}")
+                print(f"{mask.sum().item()}/{num_instances} latents have reached the limit")
                 #print("")
             
             adv_pred_class = self.linear_classifier(latent_codes.weight)
