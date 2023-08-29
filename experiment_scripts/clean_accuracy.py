@@ -101,7 +101,7 @@ for c in range(13):
 
     # --- init LFN ---
 
-    model_lfn = LFAutoDecoder(latent_dim=256, num_instances=dataset.num_instances, classify=True).cuda()
+    model_lfn = LFAutoDecoder(latent_dim=256, num_instances=dataset_lfn.num_instances, classify=True).cuda()
     model_lfn.eval()
 
     if opt.checkpoint_path_lfn is not None:
