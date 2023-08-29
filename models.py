@@ -323,9 +323,24 @@ class LFAutoDecoder(LightFieldModel):
                     total_loss += single_loss
                 optimizer.zero_grad()
                 total_loss.backward()
+
+                #backup old latents (guaranteed to be within bounds) before optimization step
                 old_latents = latent_codes.weight.data.clone() # Want these to not be affected by optimizer
                 old_latents.requires_grad_(False) # not sure if this is necessary
 
+                def batched_l2_distance(x, y, axes):
+                    """Compute the batched l2 distance of x to y along the described axes"""
+                    axes.sort()
+                    axes = axes[::-1]
+                    norm = 1
+                    result = (x - y).pow(2)
+                    for axis in axes:
+                        norm *= result.shape[axis]
+                        result = result.sum(axis)
+                    #return 1/norm * result.sqrt().flatten()
+                    return result.sqrt().flatten()
+
+                # During first iteration, try to adjust LR such that not all latents are immediately moved outside the limit
                 terminate = False
                 cnt = 0
                 while (not terminate and iter == 0 and cnt < 10):
@@ -333,28 +348,26 @@ class LFAutoDecoder(LightFieldModel):
                     optimizer.step()
                     novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
 
-                    def batched_l2_distance(x, y, axes):
-                        """Compute the batched l2 distance of x to y along the described axes"""
-                        axes.sort()
-                        axes = axes[::-1]
-                        norm = 1
-                        result = (x - y).pow(2)
-                        for axis in axes:
-                            norm *= result.shape[axis]
-                            result = result.sum(axis)
-                        #return 1/norm * result.sqrt().flatten()
-                        return result.sqrt().flatten()
-                    
                     distance = batched_l2_distance(novel_views, rgb, [2, 3])
-                    #print(distance)
                     mask = (distance > eps)
+
                     terminate = not mask.all()
-                    if iter == 0:
-                        # half optimizer LR, restore and retry
-                        optimizer.param_groups[0]['lr'] /= 2
-                    #restore 
+                    # half optimizer LR, restore and retry
+                    optimizer.param_groups[0]['lr'] /= 2
                     latent_codes.weight.data[mask, :] = old_latents[mask, :]
                     print(f"lr: {optimizer.param_groups[0]['lr']}")
+
+                # During any other iteration, assume we have correctly adjusted the LR
+                optimizer.step()
+
+                novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
+                distance = batched_l2_distance(novel_views, rgb, [2, 3])
+                mask = (distance > eps)
+                #restore those latents which have been moved out of bounds
+                latent_codes.weight.data[mask, :] = old_latents[mask, :]
+                # If all latents have been moved out of bounds, we can abort the optimization
+                if mask.all():
+                    break
 
                 print(f"----- Iteration {iter} -----")
                 print(f"{mask.sum().item()}/{num_instances} latents have reached the limit")
@@ -382,7 +395,7 @@ class LFAutoDecoder(LightFieldModel):
                 out_file.write(f"{eps}: {adv_acc}\n")
             print(f"Adversarial accuracy: {adv_acc * 100:.1f}%")
 
-            # Restore clean latents
+            # restore clean latents for next epsilon
             latent_codes.weight.data = clean_latents
 
 
