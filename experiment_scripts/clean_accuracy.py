@@ -142,7 +142,7 @@ for c in range(13):
         model_lfn.lr = opt.lr
 
         clean_acc_lfn = fb.accuracy(fmodel_lfn, rgb, labels)
-        out_file_lfn.write(f"{c}: {clean_acc_lfn.item() * 100:4.1f}\n")
+        out_file_lfn.write(f"{c}: {clean_acc_lfn * 100:4.1f}\n")
 
     # --- eval FF ---
 
@@ -151,6 +151,6 @@ for c in range(13):
         labels = labels.cuda()
 
         clean_acc_ff = fb.accuracy(fmodel_ff, imgs, labels)
-        out_file_ff.write(f"{c}: {clean_acc_ff.item() * 100:4.1f}\n")
+        out_file_ff.write(f"{c}: {clean_acc_ff * 100:4.1f}\n")
 
 
