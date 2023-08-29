@@ -146,7 +146,7 @@ for c in range(13):
 
     # --- eval FF ---
 
-    for imgs, labels in dataloader:
+    for imgs, labels in dataloader_ff:
         imgs = imgs.cuda()
         labels = labels.cuda()
 
