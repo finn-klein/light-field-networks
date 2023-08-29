@@ -17,7 +17,7 @@ ff_root_path="/home/woody/iwi9/iwi9015h/nmr_ff_test_2"
 ff_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train_baseline01/checkpoints/best.pth"
 
 mkdir $1
-python $script_path/gradient_attack_resnet.py --data_root_ff $ff_root_path --data_root_lfn $lfn_root_path \
+python $script_path/clean_accuracy.py --data_root_ff $ff_root_path --data_root_lfn $lfn_root_path \
     --checkpoint_path_ff $ff_ckpt_path --checkpoint_path_lfn $lfn_ckpt_path \
     --out_path $1
 exit 1
