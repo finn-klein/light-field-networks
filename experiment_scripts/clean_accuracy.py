@@ -80,7 +80,7 @@ for c in range(13):
     print("Loading datasets")
     class_id = [multiclass_dataio.class2string_dict[c]]
     dataset_lfn = multiclass_dataio.SceneClassDataset(num_context=1, num_trgt=1,
-                                                        root_dir=opt.data_root, query_sparsity=None,
+                                                        root_dir=opt.data_root_lfn, query_sparsity=None,
                                                         img_sidelength=opt.img_sidelength, vary_context_number=True,
                                                         specific_observation_idcs=specific_observation_idcs, cache=None,
                                                         max_num_instances=opt.max_num_instances,
@@ -93,7 +93,7 @@ for c in range(13):
                             drop_last=True, num_workers=0)
 
     # Initialize dataset
-    dataset_ff = datasets.ImageFolder(opt.data_root)
+    dataset_ff = datasets.ImageFolder(opt.data_root_ff)
     dataset_ff = [(item, label) for (item, label) in dataset_ff if label==c]
     dataloader_ff = DataLoader(dataset_ff, batch_size=opt.batch_size, shuffle=False, num_workers=0, collate_fn=collate)
 
