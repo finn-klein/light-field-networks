@@ -105,8 +105,8 @@ for c in range(13):
     model_lfn.eval()
 
     if opt.checkpoint_path_lfn is not None:
-        print(f"Loading weights from {opt.checkpoint_path}...")
-        state_dict = torch.load(opt.checkpoint_path)
+        print(f"Loading weights from {opt.checkpoint_path_lfn}...")
+        state_dict = torch.load(opt.checkpoint_path_lfn)
         del state_dict['latent_codes.weight']
         model_lfn.load_state_dict(state_dict, strict=False)
 
