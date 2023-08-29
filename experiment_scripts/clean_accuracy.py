@@ -59,11 +59,6 @@ if opt.num_instances_per_class is not None:
 else:
     num_instances_per_class = None
 
-if opt.single_class_string != None:
-    selected_class_str = [opt.single_class_string]
-else:
-    selected_class_str = None
-
 # helper function to get numpy array from PIL image
 def collate(data):
     d = list(zip(*data))
