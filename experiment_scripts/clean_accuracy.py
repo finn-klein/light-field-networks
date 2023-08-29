@@ -113,7 +113,7 @@ for c in range(13):
     fmodel_lfn = fb.PyTorchModel(model_lfn, bounds=(-1, 1))
 
     # --- init FF ---
-
+    num_classes = len(dataset_ff.find_classes(opt.data_root_ff)[0])
     model_ff = torchvision.models.resnet50().eval()
     model_ff = model_ff.cuda()
     in_feat = model_ff.fc.in_features
