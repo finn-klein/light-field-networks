@@ -351,7 +351,7 @@ class LFAutoDecoder(LightFieldModel):
                     distance = batched_l2_distance(novel_views, rgb, [2, 3])
                     mask = (distance > eps)
 
-                    terminate = not mask.all()
+                    terminate = not mask.any()
                     # half optimizer LR, restore and retry
                     optimizer.param_groups[0]['lr'] /= 2
                     latent_codes.weight.data[mask, :] = old_latents[mask, :]
