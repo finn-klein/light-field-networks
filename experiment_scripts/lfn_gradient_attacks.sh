@@ -17,8 +17,8 @@ for class in {0..12}; do
     python experiment_scripts/lfn_adversarial.py --data_root /home/woody/iwi9/iwi9015h/nmr/NMR_Dataset \
     --checkpoint_path /home/vault/iwi9/iwi9015h/experiments/train00/nmr/64_128_None/checkpoints/model_epoch_0006_iter_040000.pth \
     --num_inference_iters 500 \
-    --num_instances_per_class 256 \
-    --batch_size 256 \
+    --num_instances_per_class 128 \
+    --batch_size 128 \
     --lr 5e-4 \
     --single_class_string ${class} \
     --out_folder $1 \
