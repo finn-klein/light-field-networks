@@ -352,14 +352,15 @@ class LFAutoDecoder(LightFieldModel):
                     distance = batched_l2_distance(novel_views, clean_render, [2, 3])
                     mask = (distance > eps)
                     print(distance)
+                    print(mask)
                     terminate = not mask.any()
                     # half optimizer LR, restore and retry
                     optimizer.param_groups[0]['lr'] /= 2
                     latent_codes.weight.data[mask, :] = old_latents[mask, :]
                     print(f"lr: {optimizer.param_groups[0]['lr']}")
 
-                if not mask.any():
-                    break
+                # if not mask.any():
+                #     break
 
                 # During any other iteration, assume we have correctly adjusted the LR
                 optimizer.step()
@@ -377,10 +378,10 @@ class LFAutoDecoder(LightFieldModel):
                 print(f"{mask.sum().item()}/{num_instances} latents have reached the limit")
                 #print("")
             
-            if not mask.any():
-                out_file.write(f"{eps}: all latents out of bounds")
-                # continue with next epsilon
-                continue
+            # if not mask.any():
+            #     out_file.write(f"{eps}: all latents out of bounds")
+            #     # continue with next epsilon
+            #     continue
             
             n_latents_in_bound = (not mask).sum()
             adv_pred_class = self.linear_classifier(latent_codes.weight)
