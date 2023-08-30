@@ -21,7 +21,8 @@ module load git
 
 conda activate lf
 
-attacks=("l2gauss" "l2uniform" "l2clippinggauss" "l2clippinguniform" "linfuniform") # "l2repeatedgauss" "l2repeateduniform" "l2clippingrepeatedgauss" "l2clippingrepeateduniform" "linfrepeateduniform")
+#attacks=("l2gauss" "l2uniform" "l2clippinggauss" "l2clippinguniform" "linfuniform") # "l2repeatedgauss" "l2repeateduniform" "l2clippingrepeatedgauss" "l2clippingrepeateduniform" "linfrepeateduniform")
+attacks=("linfuniform")
 script_path="/home/woody/iwi9/iwi9015h/light-field-networks/experiment_scripts"
 lfn_root_path="/home/woody/iwi9/iwi9015h/nmr/NMR_Dataset"
 lfn_ckpt_path="/home/vault/iwi9/iwi9015h/experiments/train00/nmr/64_128_None/checkpoints/model_epoch_0006_iter_040000.pth"
@@ -57,23 +58,22 @@ for class in {0..12}; do
 done
 cd ..
 
-# --- FF ---
-# mkdir FF
-# cd FF
-# echo "FF"
-
-# for class in {0..12}; do
-#   mkdir $class
-#   cd $class
-#   for attack in "${attacks[@]}"
-#   do
-#     mkdir $attack
-#     cd $attack
-#     echo "$attack"
-#     python $script_path/adv_attack_resnet.py --data_root $ff_root_path --attack_name $attack --single_class_string $class --out_file ff_${attack}_${class}.txt --checkpoint_path $ff_ckpt_path
-#     cd ..
-#   done
-#   cd ..
-# done
+--- FF ---
+mkdir FF
+cd FF
+echo "FF"
+for class in {0..12}; do
+  mkdir $class
+  cd $class
+  for attack in "${attacks[@]}"
+  do
+    mkdir $attack
+    cd $attack
+    echo "$attack"
+    python $script_path/adv_attack_resnet.py --data_root $ff_root_path --attack_name $attack --single_class_string $class --out_file ff_${attack}_${class}.txt --checkpoint_path $ff_ckpt_path
+    cd ..
+  done
+  cd ..
+done
 
 exit 1
