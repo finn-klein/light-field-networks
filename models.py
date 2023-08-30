@@ -383,11 +383,11 @@ class LFAutoDecoder(LightFieldModel):
             #     # continue with next epsilon
             #     continue
             
-            n_latents_in_bound = (not mask).sum()
+            #n_latents_in_bound = (not mask).sum()
             adv_pred_class = self.linear_classifier(latent_codes.weight)
             adv_pred_class = adv_pred_class.argmax(axis=-1)
             # only remember those correct predictions which had an underlying latent within bounds
-            correct_predictions = (adv_pred_class == labels) and (not mask)
+            correct_predictions = (adv_pred_class == labels)
 
             # save all misclassifications
             if out_folder is not None and save_imgs:
