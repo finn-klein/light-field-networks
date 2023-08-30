@@ -350,12 +350,15 @@ class LFAutoDecoder(LightFieldModel):
 
                     distance = batched_l2_distance(novel_views, rgb, [2, 3])
                     mask = (distance > eps)
-                    print(mask)
+                    print(distance)
                     terminate = not mask.any()
                     # half optimizer LR, restore and retry
                     optimizer.param_groups[0]['lr'] /= 2
                     latent_codes.weight.data[mask, :] = old_latents[mask, :]
                     print(f"lr: {optimizer.param_groups[0]['lr']}")
+
+                if not mask.any():
+                    break
 
                 # During any other iteration, assume we have correctly adjusted the LR
                 optimizer.step()
@@ -373,9 +376,16 @@ class LFAutoDecoder(LightFieldModel):
                 print(f"{mask.sum().item()}/{num_instances} latents have reached the limit")
                 #print("")
             
+            if not mask.any():
+                out_file.write(f"{eps}: all latents out of bounds")
+                # continue with next epsilon
+                continue
+            
+            n_latents_in_bound = (not mask).sum()
             adv_pred_class = self.linear_classifier(latent_codes.weight)
             adv_pred_class = adv_pred_class.argmax(axis=-1)
-            correct_predictions = (adv_pred_class == labels)
+            # only remember those correct predictions which had an underlying latent within bounds
+            correct_predictions = (adv_pred_class == labels) and (not mask)
 
             # save all misclassifications
             if out_folder is not None and save_imgs:
@@ -390,6 +400,7 @@ class LFAutoDecoder(LightFieldModel):
                         Image.fromarray(adv_img).save(f"{out_folder}/adv_{i}.png", mode="RGB")
                         Image.fromarray(gt_img).save(f"{out_folder}/gt_{i}.png", mode="RGB")
 
+            # TODO: Replace with sum (along which axis? idk rn too tired)
             adv_acc = float(correct_predictions.float().mean(axis=-1).cpu())
             if out_folder is not None:
                 out_file.write(f"{eps}: {adv_acc}\n")
