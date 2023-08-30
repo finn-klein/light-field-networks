@@ -301,6 +301,7 @@ class LFAutoDecoder(LightFieldModel):
 
         # Save clean latents to restore later
         clean_latents = latent_codes.weight.data.clone()
+        clean_render = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
 
         print("Running adversarial attacks")
         
@@ -348,7 +349,7 @@ class LFAutoDecoder(LightFieldModel):
                     optimizer.step()
                     novel_views = self.forward_render(latent_codes.weight, pose, uv, intrinsics, b, n_qry, n_pix)
 
-                    distance = batched_l2_distance(novel_views, rgb, [2, 3])
+                    distance = batched_l2_distance(novel_views, clean_render, [2, 3])
                     mask = (distance > eps)
                     print(distance)
                     terminate = not mask.any()
