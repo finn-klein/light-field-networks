@@ -151,10 +151,10 @@ for model_input, ground_truth in iter(dataloader): #will run infinitely
         #     0.5,
         #     1.0,
         # ]
-        epsilons = list(range(20))
+        epsilons = list(range(21))
         epsilons = [x/40 for x in epsilons]
         epsilons += [(x+10)/20 for x in range(10)]
-        epsilons = [x * 12.8 for x in epsilons]
+        epsilons = [x * 1.0 for x in epsilons]
         raw_advs, clipped_advs, success = attack(fmodel, inputs=rgb, criterion=labels, epsilons=epsilons)
         robust_accuracy = 1 - success.float().mean(axis=-1)
         robust_accs.append(robust_accuracy)
